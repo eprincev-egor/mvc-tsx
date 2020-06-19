@@ -17,14 +17,14 @@ class LoginModel extends Model {
 class LoginController extends Controller<LoginModel> {
 
     @on("change", ".Login--loginInput")
-    onChangeName( @arg("target", "value") inputValue ) {
+    onChangeLogin( @arg("target", "value") inputValue ) {
         this.model.set({
             name: inputValue
         });
     }
 
     @on("change", ".Login--passInput")
-    onChangeName( @arg("target", "value") inputValue ) {
+    onChangePassword( @arg("target", "value") inputValue ) {
         this.model.set({
             password: inputValue
         });
