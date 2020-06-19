@@ -1,0 +1,78 @@
+{
+  "name": "mvc-tsx",
+  "version": "0.0.0",
+  "description": "MVC based on React",
+  "main": "dist/index.js",
+  "types": "lib/index.ts",
+  "scripts": {
+    "build": "gulp build",
+    "watch": "gulp watch",
+    "test": "nyc --reporter=html --reporter=text-summary mocha",
+    "prepublishOnly": "build"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true,
+    "require": [
+      "ts-node/register",
+      "source-map-support/register"
+    ],
+    "exclude": [
+      "dist",
+      "coverage",
+      "gulp"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eprincev-egor/jsin-git.git"
+  },
+  "keywords": [
+    "react",
+    "mvc",
+    "tsx",
+    "typescript",
+    "model",
+    "view",
+    "controller",
+    "mv*",
+    "lib"
+  ],
+  "author": "Eprintsev Egor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eprincev-egor/jsin-git/issues"
+  },
+  "homepage": "https://github.com/eprincev-egor/jsin-git#readme",
+  "devDependencies": {
+    "@types/jsdom": "^16.2.3",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.13",
+    "@types/react": "^16.9.36",
+    "@types/react-dom": "^16.9.8",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-watch": "^5.0.1",
+    "jsdom": "^16.2.2",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
+    "source-map-support": "^0.5.19",
+    "ts-node": "^8.10.2",
+    "tsc": "^1.20150623.0",
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
