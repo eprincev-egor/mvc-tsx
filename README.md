@@ -79,3 +79,4 @@ ReactDOM.render(
 
 # Examples
 [clock](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/clock)  
+[counter](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/counter)  
