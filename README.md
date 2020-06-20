@@ -1,4 +1,5 @@
 # MVC-TSX  (WIP, alpha version)
+![CI status](https://circleci.com/gh/eprincev-egor/mvc-tsx.svg?style=shield)
 
 MVC-TSX позволяет писать императивный код для построения реактивных приложений.
 
@@ -75,3 +76,6 @@ ReactDOM.render(
 [minify + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.min.js)  
 
 [MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.full.js)  
+
+# Examples
+[clock](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/clock)  
