@@ -1,0 +1,11 @@
+.Root--products {
+    display: table;
+    width: 400px;
+    float: left;
+    margin-right: 6px;;
+}
+
+.Root--cart {
+    width: 400px;
+    float: left;
+}

@@ -86,7 +86,8 @@ exports.build = series(
 exports.watch = function watchSrc() {
     watch([
         "./examples/**/*.ts",
-        "./examples/**/*.tsx"
+        "./examples/**/*.tsx",
+        "./examples/**/*.css"
     ], build_examples);
 
     watch([

@@ -1,0 +1,29 @@
+.Product {
+    display: table-row;
+    width: 100%;
+}
+
+.Product--name {
+    display: table-cell;
+}
+
+.Product--price {
+    display: table-cell;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+.Product--toCart {
+    display: table-cell;
+}
+
+.Product--addToCartBtn {
+    display: inline-block;
+    background: green;
+    font-size: 12px;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-sizing: border-box;
+}

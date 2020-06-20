@@ -1,0 +1,29 @@
+.Cart {
+    border: 1px solid #ddd;
+    box-sizing: border-box;
+    padding: 6px 12px;
+}
+
+.Cart--positions {
+    display: table;
+}
+
+.Cart--label {
+    font-weight: bold;
+}
+
+.Cart--total {
+    margin-top: 6px;
+    font-weight: bold;
+}
+
+.Cart--clearBtn {
+    display: inline-block;
+    background: red;
+    font-size: 12px;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
