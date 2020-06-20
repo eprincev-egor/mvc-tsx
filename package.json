@@ -8,7 +8,7 @@
     "build": "gulp build",
     "watch": "gulp watch",
     "test": "nyc --reporter=html --reporter=text-summary mocha",
-    "lint": "tslint src/**/*.ts && tslint src/**/*.tsx && tslint test/**/*.ts && tslint test/**/*.tsx",
+    "lint": "tslint lib/**/*.ts && tslint lib/**/*.tsx && tslint test/**/*.ts && tslint test/**/*.tsx",
     "prepublishOnly": "npm run build"
   },
   "nyc": {
@@ -27,7 +27,9 @@
     "exclude": [
       "bundle",
       "coverage",
-      "gulp"
+      "gulp",
+      "examples",
+      "deps"
     ]
   },
   "repository": {
