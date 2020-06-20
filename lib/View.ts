@@ -52,6 +52,27 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         rootEl._model = this.model;
     }
 
+    componentWillUnmount() {
+        // clear memory leaks
+
+        this.onDestroy();
+
+        const rootEl = ReactDOM.findDOMNode(this) as any;
+        delete rootEl._model;
+
+        domEvents.destroyListeners(this);
+        
+        for (const controller of this.controllersInstances) {
+            controller.destroy();
+        }
+        
+        this.controllersInstances = [];
+    }
+
+    onDestroy() {
+        // redefine me
+    }
+
     controllers(): (new (model: TModel) => Controller<TModel>)[] {
         return [];
     }

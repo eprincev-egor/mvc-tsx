@@ -4,6 +4,7 @@ import { JSDOM } from "jsdom";
 import { act } from "react-dom/test-utils";
 import assert from "assert";
 import { Controller, View, Model, on, arg } from "../lib";
+import { DOMListener } from "../lib/DOMListener";
 
 describe("Controller", () => {
     const dom = new JSDOM("<!DOCTYPE html><body></body>");
@@ -529,6 +530,144 @@ describe("Controller", () => {
         someEl.dispatchEvent(clickEvent);
 
         assert.strictEqual(hasCall, false);
+    });
+
+    it("stop listen dom events after destroy component", () => {
+        let controllerCallsCount = 0;
+        let domCallsCount = 0;
+
+        const original = (DOMListener as any).prototype.onDOMEvent;
+        (DOMListener as any).prototype.onDOMEvent = function(...args: any[]) {
+            domCallsCount++;
+            original.call(this, ...args);
+        };
+
+        class ChildModel extends Model {}
+        class ParentModel extends Model {
+            renderElement: boolean = true;
+            child: ChildModel = new ChildModel();
+        }
+
+        class ChildController extends Controller<ChildModel> {
+            @on("click", ".button")
+            onClickButton() {
+                controllerCallsCount++;
+            }
+        }
+
+        class ChildView extends View<ChildModel> {
+            controllers() {
+                return [
+                    ChildController
+                ];
+            }
+
+            template(model: ChildModel) {
+                return <div>
+                    <button className="button"></button>
+                </div>
+            }
+        }
+
+        class ParentView extends View<ParentModel> {
+            template(model: ParentModel) {
+                if ( model.renderElement ) {
+                    return <ChildView model={model.child}></ChildView>
+                }
+                else {
+                    return <div></div>
+                }
+            }
+        }
+
+        const testModel = new ParentModel();
+        act(() => {
+            render(<ParentView model={testModel}/>, container);
+        });
+
+        const buttonEl = document.querySelector(".button") as HTMLButtonElement;
+
+        const clickEvent1 = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent1);
+
+        assert.strictEqual(controllerCallsCount, 1, "first controller call");
+        assert.strictEqual(domCallsCount, 1, "first dom call");
+
+        testModel.set({
+            renderElement: false
+        });
+
+        const clickEvent2 = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent2);
+
+        assert.strictEqual(controllerCallsCount, 1, "second controller call");
+        assert.strictEqual(domCallsCount, 1, "second dom call");
+
+        (DOMListener as any).prototype.onDOMEvent = original;
+    });
+
+    it("stop listen model events after destroy component", () => {
+        let controllerCallsCount = 0;
+
+        class ChildModel extends Model {
+            value: number = 0;
+        }
+
+        class ParentModel extends Model {
+            renderElement: boolean = true;
+            child: ChildModel = new ChildModel();
+        }
+
+        class ChildController extends Controller<ChildModel> {
+            @on("change", "model")
+            onClickButton() {
+                controllerCallsCount++;
+            }
+        }
+
+        class ChildView extends View<ChildModel> {
+            controllers() {
+                return [
+                    ChildController
+                ];
+            }
+
+            template(model: ChildModel) {
+                return <div></div>
+            }
+        }
+
+        class ParentView extends View<ParentModel> {
+            template(model: ParentModel) {
+                if ( model.renderElement ) {
+                    return <ChildView model={model.child}></ChildView>
+                }
+                else {
+                    return <div></div>
+                }
+            }
+        }
+
+        const testModel = new ParentModel();
+        act(() => {
+            render(<ParentView model={testModel}/>, container);
+        });
+
+        testModel.child.set({
+            value: 1
+        });
+
+        assert.strictEqual(controllerCallsCount, 1, "first model change");
+
+        testModel.set({
+            renderElement: false
+        });
+
+        testModel.child.set({
+            value: 2
+        });
+
+        assert.strictEqual(controllerCallsCount, 1, "second model change");
     });
 
 });

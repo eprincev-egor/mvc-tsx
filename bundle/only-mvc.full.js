@@ -106,6 +106,7 @@ exports.Controller = void 0;
 const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
 class Controller {
     constructor(model) {
+        this.modelListeners = [];
         this.model = model;
         this.initModelEvents();
     }
@@ -114,10 +115,25 @@ class Controller {
         const modelListeners = listeners.filter(listener => ControllerMeta_1.isModelListener(listener));
         for (const listener of modelListeners) {
             const eventType = listener.eventType;
-            this.model.on(eventType, (...args) => {
+            const handler = (...args) => {
                 listener.handler(...args);
+            };
+            this.modelListeners.push({
+                eventType,
+                handler
             });
+            this.model.on(eventType, handler);
         }
+    }
+    destroy() {
+        this.onDestroy();
+        for (const modelListener of this.modelListeners) {
+            this.model.removeListener(modelListener.eventType, modelListener.handler);
+        }
+        delete this.model;
+    }
+    onDestroy() {
+        // redefine me
     }
 }
 exports.Controller = Controller;
@@ -226,10 +242,21 @@ exports.DOMEvents = void 0;
 const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
 const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
 class DOMEvents {
+    constructor() {
+        this.listeners = [];
+    }
     addController(controller, view) {
         const listeners = ControllerMeta_1.getListeners(controller);
         for (const listener of listeners) {
             this.addListener(listener, view);
+        }
+    }
+    destroyListeners(view) {
+        const viewListeners = this.listeners.filter(listener => listener.view === view);
+        for (const listener of viewListeners) {
+            listener.destroy();
+            const listenerIndex = this.listeners.indexOf(listener);
+            this.listeners.splice(listenerIndex, 1);
         }
     }
     addListener(listener, view) {
@@ -244,6 +271,7 @@ class DOMEvents {
             view
         });
         domListener.listen();
+        this.listeners.push(domListener);
     }
 }
 exports.DOMEvents = DOMEvents;
@@ -290,9 +318,17 @@ class DOMListener {
         this.view = params.view;
     }
     listen() {
-        document.addEventListener(this.eventType, (event) => {
+        this.domHandler = (event) => {
             this.onDOMEvent(event);
-        });
+        };
+        document.addEventListener(this.eventType, this.domHandler);
+    }
+    destroy() {
+        document.removeEventListener(this.eventType, this.domHandler);
+        delete this.view;
+        delete this.handler;
+        delete this.domHandler;
+        delete this.handlerArgs;
     }
     onDOMEvent(event) {
         if (this.isValidEvent(event)) {
@@ -427,6 +463,20 @@ class View extends React.Component {
     componentDidMount() {
         const rootEl = ReactDOM.findDOMNode(this);
         rootEl._model = this.model;
+    }
+    componentWillUnmount() {
+        // clear memory leaks
+        this.onDestroy();
+        const rootEl = ReactDOM.findDOMNode(this);
+        delete rootEl._model;
+        domEvents.destroyListeners(this);
+        for (const controller of this.controllersInstances) {
+            controller.destroy();
+        }
+        this.controllersInstances = [];
+    }
+    onDestroy() {
+        // redefine me
     }
     controllers() {
         return [];

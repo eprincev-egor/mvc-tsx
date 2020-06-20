@@ -14,11 +14,12 @@ interface IDOMListenerParams {
 }
 
 export class DOMListener {
+    view: View<any>;
     private eventType: keyof HTMLElementEventMap;
     private selector: string;
     private handlerArgs: ( string[] | (new (...args: any[]) => Model))[];
     private handler: (...args: any[]) => void;
-    private view: View<any>;
+    private domHandler!: (...args: any[]) => void;
 
     constructor(params: IDOMListenerParams) {
         this.eventType = params.eventType;
@@ -26,12 +27,22 @@ export class DOMListener {
         this.handlerArgs = params.handlerArgs;
         this.handler = params.handler;
         this.view = params.view;
+
     }
 
     listen() {
-        document.addEventListener(this.eventType, (event: Event) => {
+        this.domHandler = (event: Event) => {
             this.onDOMEvent(event);
-        });
+        };
+        document.addEventListener(this.eventType, this.domHandler);
+    }
+
+    destroy() {
+        document.removeEventListener(this.eventType, this.domHandler);
+        delete this.view;
+        delete this.handler;
+        delete this.domHandler;
+        delete this.handlerArgs;
     }
 
     private onDOMEvent(event: Event) {
