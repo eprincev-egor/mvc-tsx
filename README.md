@@ -70,8 +70,8 @@ ReactDOM.render(
 
 [minify + React + EventEmitter + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/mvc-and-deps.min.js)  
 
-[React + EventEmitter + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/mvc-and-deps.min.js)  
+[React + EventEmitter + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/mvc-and-deps.full.js)  
 
 [minify + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.min.js)  
 
-[MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.min.js)  
+[MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.full.js)  
