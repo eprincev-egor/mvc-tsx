@@ -9,8 +9,8 @@ import {Model, View, Controller, on, arg} from "mvc";
 
 // define Model
 class LoginModel extends Model {
-    login: string;
-    password: string;
+    login: string = "";
+    password: string = "";
 }
 
 // define Controller
@@ -65,3 +65,13 @@ ReactDOM.render(
 );
 
 ```
+
+# Downloads
+
+[minify + React + EventEmitter + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/mvc-and-deps.min.js)  
+
+[React + EventEmitter + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/mvc-and-deps.min.js)  
+
+[minify + MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.min.js)  
+
+[MVC](https://raw.githubusercontent.com/eprincev-egor/mvc-tsx/master/bundle/only-mvc.min.js)  

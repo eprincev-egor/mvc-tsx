@@ -8,7 +8,8 @@
     "build": "gulp build",
     "watch": "gulp watch",
     "test": "nyc --reporter=html --reporter=text-summary mocha",
-    "prepublishOnly": "build"
+    "lint": "tslint src/**/*.ts && tslint src/**/*.tsx && tslint test/**/*.ts && tslint test/**/*.tsx",
+    "prepublishOnly": "npm run build"
   },
   "nyc": {
     "extension": [
@@ -24,14 +25,14 @@
       "source-map-support/register"
     ],
     "exclude": [
-      "dist",
+      "bundle",
       "coverage",
       "gulp"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eprincev-egor/jsin-git.git"
+    "url": "git+https://github.com/eprincev-egor/mvc-tsx.git"
   },
   "keywords": [
     "react",
@@ -42,7 +43,8 @@
     "view",
     "controller",
     "mv*",
-    "lib"
+    "lib",
+    "frontend"
   ],
   "author": "Eprintsev Egor",
   "license": "MIT",
@@ -65,11 +67,15 @@
     "jsdom": "^16.2.2",
     "mocha": "^8.0.1",
     "nyc": "^15.1.0",
+    "source-map-loader": "^1.0.0",
     "source-map-support": "^0.5.19",
+    "ts-loader": "^7.0.5",
     "ts-node": "^8.10.2",
     "tsc": "^1.20150623.0",
     "tslint": "^6.1.2",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0",
+    "webpack-stream": "^5.2.1"
   },
   "dependencies": {
     "react": "^16.13.1",
