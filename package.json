@@ -32,7 +32,8 @@
       "examples",
       "deps",
       "gulpfile.js",
-      ".mocharc.js"
+      ".mocharc.js",
+      "lib/index.ts"
     ]
   },
   "repository": {
