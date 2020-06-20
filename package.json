@@ -1,8 +1,8 @@
 {
   "name": "mvc-tsx",
-  "version": "0.0.4",
+  "version": "0.0.7",
   "description": "MVC based on React",
-  "main": "dist/index.js",
+  "main": "bundle/mvc-and-deps.min.js",
   "types": "lib/index.ts",
   "scripts": {
     "build": "gulp build",
