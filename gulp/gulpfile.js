@@ -1,6 +1,6 @@
 "use strict";
 
-const {src, dest, series} = require("gulp");
+const {src, dest, series, watch} = require("gulp");
 const clean = require("gulp-clean");
 const webpackStream = require("webpack-stream");
 const named = require("vinyl-named");
@@ -82,5 +82,23 @@ exports.build = series(
     build_mvc_with_deps_full,
     build_examples
 );
+
+exports.watch = function watchSrc() {
+    watch([
+        "./examples/**/*.ts",
+        "./examples/**/*.tsx"
+    ], build_examples);
+
+    watch([
+        "./lib/**/*.ts",
+        "./lib/**/*.tsx"
+    ], series(
+        clearBundles,
+        build_only_mvc_min,
+        build_only_mvc_full,
+        build_mvc_with_deps_min,
+        build_mvc_with_deps_full
+    ));
+};
 
 exports["build-examples"] = build_examples;
