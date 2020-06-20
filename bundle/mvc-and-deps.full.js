@@ -97,18 +97,22 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ({
 
 /***/ "./deps/events.js":
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_RESULT__;// https://github.com/Olical/EventEmitter
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EventEmitter", function() { return EventEmitter; });
+// https://github.com/Olical/EventEmitter
 /*!
  * EventEmitter v5.2.9 - git.io/ee
  * Unlicense - http://unlicense.org/
  * Oliver Caldwell - https://oli.me.uk/
  * @preserve
  */
-
-;(function (exports) {
-    'use strict';
+    var exports = {};
+    if ( typeof window !== "undefined" ) {
+        exports = window;
+    }
 
     /**
      * Class for managing events.
@@ -573,15 +577,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;// https://github.com/Olical/EventEmitter
         return EventEmitter;
     };
 
-    // Expose the class either via AMD, CommonJS or the global object
-    if (true) {
-        !(__WEBPACK_AMD_DEFINE_RESULT__ = (function () {
-            return EventEmitter;
-        }).call(exports, __webpack_require__, exports, module),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-    }
-    else {}
-}(typeof window !== 'undefined' ? window : this || {}));
+
 
 /***/ }),
 
@@ -29421,17 +29417,57 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.arg = exports.on = void 0;
+exports.arg = exports.on = exports.Controller = exports.View = exports.Model = exports.EventEmitter = exports.ReactDOM = exports.React = void 0;
+const React = __importStar(__webpack_require__("./deps/react.js"));
+exports.React = React;
+const ReactDOM = __importStar(__webpack_require__("./deps/react-dom.js"));
+exports.ReactDOM = ReactDOM;
+const events_1 = __webpack_require__("./deps/events.js");
+Object.defineProperty(exports, "EventEmitter", { enumerable: true, get: function () { return events_1.EventEmitter; } });
 const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
 Object.defineProperty(exports, "on", { enumerable: true, get: function () { return ControllerMeta_1.on; } });
 Object.defineProperty(exports, "arg", { enumerable: true, get: function () { return ControllerMeta_1.arg; } });
-__exportStar(__webpack_require__("./lib/Model.ts"), exports);
-__exportStar(__webpack_require__("./lib/View.ts"), exports);
-__exportStar(__webpack_require__("./lib/Controller.ts"), exports);
+const Model_1 = __webpack_require__("./lib/Model.ts");
+Object.defineProperty(exports, "Model", { enumerable: true, get: function () { return Model_1.Model; } });
+const View_1 = __webpack_require__("./lib/View.ts");
+Object.defineProperty(exports, "View", { enumerable: true, get: function () { return View_1.View; } });
+const Controller_1 = __webpack_require__("./lib/Controller.ts");
+Object.defineProperty(exports, "Controller", { enumerable: true, get: function () { return Controller_1.Controller; } });
+if (typeof window !== "undefined") {
+    const windowObj = window;
+    windowObj.MVC = {
+        React,
+        ReactDOM,
+        EventEmitter: events_1.EventEmitter,
+        Model: Model_1.Model,
+        View: View_1.View,
+        Controller: Controller_1.Controller,
+        on: ControllerMeta_1.on,
+        arg: ControllerMeta_1.arg
+    };
+    if (!windowObj.React) {
+        windowObj.React = React;
+    }
+    if (!windowObj.ReactDOM) {
+        windowObj.ReactDOM = ReactDOM;
+    }
+    if (!windowObj.EventEmitter) {
+        windowObj.EventEmitter = events_1.EventEmitter;
+    }
+}
 
 
 /***/ }),

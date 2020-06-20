@@ -5,9 +5,10 @@
  * Oliver Caldwell - https://oli.me.uk/
  * @preserve
  */
-
-;(function (exports) {
-    'use strict';
+    var exports = {};
+    if ( typeof window !== "undefined" ) {
+        exports = window;
+    }
 
     /**
      * Class for managing events.
@@ -472,16 +473,4 @@
         return EventEmitter;
     };
 
-    // Expose the class either via AMD, CommonJS or the global object
-    if (typeof define === 'function' && define.amd) {
-        define(function () {
-            return EventEmitter;
-        });
-    }
-    else if (typeof module === 'object' && module.exports){
-        module.exports = EventEmitter;
-    }
-    else {
-        exports.EventEmitter = EventEmitter;
-    }
-}(typeof window !== 'undefined' ? window : this || {}));
+export {EventEmitter};

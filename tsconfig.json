@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
         "sourceMap": true,
         "target": "esnext",
         "module": "commonjs",
@@ -10,10 +9,14 @@
         "emitDecoratorMetadata": true,
         "resolveJsonModule": true,
         "jsx": "react",
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "baseUrl": ".",
+        "paths": {
+            "mvc-tsx": ["./lib"]
+        }
     },
     "exclude": [
-        "dist",
-        "compiled"
+        "bundle",
+        "coverage"
     ]
 }
