@@ -670,4 +670,44 @@ describe("Controller", () => {
         assert.strictEqual(controllerCallsCount, 1, "second model change");
     });
 
+
+    it("selector should be simple className selector or model", () => {
+        class MyModel extends Model {}
+
+        assert.throws(() => {
+            class MyController extends Controller<MyModel> {
+                @on("click", ".button some")
+                onClickButton() {
+                    // 
+                }
+            }
+        }, err =>
+            err.message === `invalid selector ".button some", selector should be just ".some-class" or "model"`
+        );
+
+
+        assert.throws(() => {
+            class MyController extends Controller<MyModel> {
+                @on("click", ".button>some")
+                onClickButton() {
+                    // 
+                }
+            }
+        }, err =>
+            err.message === `invalid selector ".button>some", selector should be just ".some-class" or "model"`
+        );
+
+        assert.throws(() => {
+            class MyController extends Controller<MyModel> {
+                @on("click", ".button,.x")
+                onClickButton() {
+                    // 
+                }
+            }
+        }, err =>
+            err.message === `invalid selector ".button,.x", selector should be just ".some-class" or "model"`
+        );
+    });
+
+
 });

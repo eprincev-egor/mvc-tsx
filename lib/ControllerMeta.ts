@@ -24,6 +24,16 @@ export interface IListener {
 
 
 export function on(eventType: keyof HTMLElementEventMap, selector: string) {
+    const selectorIsModel = selector === "model";
+    const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+    const isValidSelector = (
+        selectorIsModel ||
+        selectorIsJustClassName
+    );
+    if ( !isValidSelector ) {
+        throw new Error(`invalid selector "${selector}", selector should be just ".some-class" or "model"`);
+    }
+
     return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
 
         if ( !target._listenersMeta ) {

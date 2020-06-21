@@ -149,6 +149,13 @@ exports.Controller = Controller;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isDomListener = exports.isModelListener = exports.getListeners = exports.arg = exports.on = void 0;
 function on(eventType, selector) {
+    const selectorIsModel = selector === "model";
+    const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+    const isValidSelector = (selectorIsModel ||
+        selectorIsJustClassName);
+    if (isValidSelector) {
+        throw new Error(`invalid selector "${selector}", selector should be just ".some-class" or "model"`);
+    }
     return (target, methodName, descriptor) => {
         if (!target._listenersMeta) {
             target._listenersMeta = [];
