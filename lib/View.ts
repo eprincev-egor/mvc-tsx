@@ -6,11 +6,20 @@ import { DOMEvents } from "./DOMEvents";
 
 const domEvents = new DOMEvents();
 
+/**
+ * Base View layer
+ * @extends React.Component
+ */
 export abstract class View<TModel extends Model> extends React.Component<{model: TModel}> {
     model!: TModel;
     protected controllersInstances!: Controller<TModel>[];
     
-    abstract template(state: TModel): JSX.Element;
+    /**
+     * HTML Template.
+     * Should be function who returns React template
+     * @param model current model
+     */
+    abstract template(model: TModel): JSX.Element;
 
     constructor(props: Readonly<{model: TModel}>) {
         super(props);
@@ -69,10 +78,18 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         this.controllersInstances = [];
     }
 
+    /**
+     * Detach listeners and fix any memory leaks.
+     * Should be any functions with clearing memory leaks.
+     */
     onDestroy() {
         // redefine me
     }
 
+    /**
+     * Register controllers.  
+     * Should be function who returns list of Controllers constructors
+     */
     controllers(): (new (model: TModel) => Controller<TModel>)[] {
         return [];
     }
