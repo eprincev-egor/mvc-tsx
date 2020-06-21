@@ -125,6 +125,10 @@ class Controller {
             this.model.on(eventType, handler);
         }
     }
+    /**
+     * Destroy controller and clear memory.
+     * Detach all listeners.
+     */
     destroy() {
         this.onDestroy();
         for (const modelListener of this.modelListeners) {
@@ -132,6 +136,11 @@ class Controller {
         }
         delete this.model;
     }
+    /**
+     * Detach listeners and fix any memory leaks.
+     * Should be any functions with clearing memory leaks.
+     * This method will be called from before .destroy()
+     */
     onDestroy() {
         // redefine me
     }
@@ -148,12 +157,18 @@ exports.Controller = Controller;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isDomListener = exports.isModelListener = exports.getListeners = exports.arg = exports.on = void 0;
+/**
+ * Attach handler to View DOM events like are click, or model events.
+ * @param eventType any DOM Event type
+ * @param selector "model" or simple class selector like are: ".my-class".
+ * Selectors like are ".a .b .c" does not supported.
+ */
 function on(eventType, selector) {
     const selectorIsModel = selector === "model";
     const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
     const isValidSelector = (selectorIsModel ||
         selectorIsJustClassName);
-    if (isValidSelector) {
+    if (!isValidSelector) {
         throw new Error(`invalid selector "${selector}", selector should be just ".some-class" or "model"`);
     }
     return (target, methodName, descriptor) => {
@@ -169,6 +184,12 @@ function on(eventType, selector) {
     };
 }
 exports.on = on;
+/**
+ * Get some value from event
+ * @param firstKey keyof dom event object
+ * @param secondKey keyof Event[firstKey], next step in property path.
+ * @param otherPropertyPath other keys
+ */
 function arg(firstKey, secondKey, ...otherPropertyPath) {
     return (target, methodName, argumentIndex) => {
         if (!target._handlersArguments) {
@@ -383,7 +404,17 @@ exports.DOMListener = DOMListener;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Model = void 0;
 const events_1 = __webpack_require__("events");
+/**
+ * Base Model layer
+ * @extends EventEmitter
+ */
 class Model extends events_1.EventEmitter {
+    /**
+     * Apply changes to model and emit changes to listeners.
+     * @param props changes to apply on model
+     * @param options any options, who will transferred to all listeners
+     * @fires change
+     */
     set(props, options = {}) {
         const changes = {};
         let hasChanges = false;
@@ -397,6 +428,12 @@ class Model extends events_1.EventEmitter {
             }
         }
         if (hasChanges) {
+            /**
+             * change event
+             *
+             * @event change
+             * @type {Partial<this>} changes
+             */
             this.emit("change", changes, options);
         }
     }
@@ -439,6 +476,10 @@ const React = __importStar(__webpack_require__("react"));
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
 const DOMEvents_1 = __webpack_require__("./lib/DOMEvents.ts");
 const domEvents = new DOMEvents_1.DOMEvents();
+/**
+ * Base View layer
+ * @extends React.Component
+ */
 class View extends React.Component {
     constructor(props) {
         super(props);
@@ -482,9 +523,17 @@ class View extends React.Component {
         }
         this.controllersInstances = [];
     }
+    /**
+     * Detach listeners and fix any memory leaks.
+     * Should be any functions with clearing memory leaks.
+     */
     onDestroy() {
         // redefine me
     }
+    /**
+     * Register controllers.
+     * Should be function who returns list of Controllers constructors
+     */
     controllers() {
         return [];
     }

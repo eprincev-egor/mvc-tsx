@@ -22,7 +22,12 @@ export interface IListener {
     handler: (...args: any[]) => void;
 }
 
-
+/**
+ * Attach handler to View DOM events like are click, or model events.
+ * @param eventType any DOM Event type
+ * @param selector "model" or simple class selector like are: ".my-class". 
+ * Selectors like are ".a .b .c" does not supported.
+ */
 export function on(eventType: keyof HTMLElementEventMap, selector: string) {
     const selectorIsModel = selector === "model";
     const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
@@ -53,6 +58,12 @@ type KeyOfDOMEvent = (
     keyof Event |
     keyof MouseEvent 
 )
+/**
+ * Get some value from event 
+ * @param firstKey keyof dom event object
+ * @param secondKey keyof Event[firstKey], next step in property path.
+ * @param otherPropertyPath other keys
+ */
 export function arg<T extends KeyOfDOMEvent | (new (...args: any[]) => Model)>(
     firstKey?: T,
     secondKey?: (

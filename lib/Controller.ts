@@ -30,6 +30,10 @@ export abstract class Controller<TModel extends Model> {
         }
     }
 
+    /**
+     * Destroy controller and clear memory.
+     * Detach all listeners.
+     */
     destroy() {
         this.onDestroy();
         
@@ -43,6 +47,11 @@ export abstract class Controller<TModel extends Model> {
         delete this.model;
     }
 
+    /**
+     * Detach listeners and fix any memory leaks.
+     * Should be any functions with clearing memory leaks.
+     * This method will be called from before .destroy()
+     */
     onDestroy() {
         // redefine me
     }
