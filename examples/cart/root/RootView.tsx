@@ -18,7 +18,7 @@ export class RootView extends View<RootModel> {
 
             <div className="Root--products">
                 {root.products.map(product =>
-                    <ProductView model={product}></ProductView>
+                    <ProductView model={product} key={product.name}></ProductView>
                 )}
             </div>
 

@@ -22,7 +22,7 @@ export class CartView extends View<CartModel> {
 
             <div className="Cart--positions">
                 {cart.positions.map(position =>
-                    <CartPositionView model={position}></CartPositionView>
+                    <CartPositionView model={position} key={position.product.name}></CartPositionView>
                 )}
             </div>
 

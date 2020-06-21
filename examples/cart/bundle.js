@@ -217,7 +217,7 @@ class CartView extends mvc_tsx_1.View {
     template(cart) {
         return react_1.default.createElement("div", { className: "Cart" },
             react_1.default.createElement("div", { className: "Cart--label" }, "Cart:"),
-            react_1.default.createElement("div", { className: "Cart--positions" }, cart.positions.map(position => react_1.default.createElement(CartPositionView_1.CartPositionView, { model: position }))),
+            react_1.default.createElement("div", { className: "Cart--positions" }, cart.positions.map(position => react_1.default.createElement(CartPositionView_1.CartPositionView, { model: position, key: position.product.name }))),
             react_1.default.createElement("div", { className: "Cart--total" },
                 "Total: ",
                 formatPrice_1.formatPrice(cart.totalPrice),
@@ -655,7 +655,7 @@ class RootView extends mvc_tsx_1.View {
     }
     template(root) {
         return react_1.default.createElement("div", { className: "Root" },
-            react_1.default.createElement("div", { className: "Root--products" }, root.products.map(product => react_1.default.createElement(ProductView_1.ProductView, { model: product }))),
+            react_1.default.createElement("div", { className: "Root--products" }, root.products.map(product => react_1.default.createElement(ProductView_1.ProductView, { model: product, key: product.name }))),
             react_1.default.createElement("div", { className: "Root--cart" },
                 react_1.default.createElement(CartView_1.CartView, { model: root.cart })));
     }
