@@ -55,9 +55,9 @@
   "author": "Eprintsev Egor",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eprincev-egor/jsin-git/issues"
+    "url": "https://github.com/eprincev-egor/mvc-tsx/issues"
   },
-  "homepage": "https://github.com/eprincev-egor/jsin-git#readme",
+  "homepage": "https://github.com/eprincev-egor/mvc-tsx#readme",
   "devDependencies": {
     "@types/jsdom": "^16.2.3",
     "@types/mocha": "^7.0.2",
