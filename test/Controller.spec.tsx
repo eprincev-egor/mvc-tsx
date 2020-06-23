@@ -709,5 +709,48 @@ describe("Controller", () => {
         );
     });
 
+    it("listen click on button with many classes", () => {
+        class MyModel extends Model {
+            counter: number = 0;
+        }
+
+        class MyController extends Controller<MyModel> {
+            @on("click", ".button")
+            onClickButton() {
+                this.model.set({
+                    counter: this.model.counter + 1
+                });
+            }
+        }
+
+        class MyView extends View<MyModel> {
+            controllers() {
+                return [
+                    MyController
+                ];
+            }
+
+            template(model: MyModel) {
+                return <div>
+                    <div className="counter">{model.counter}</div>
+                    <button className="many button classes"></button>
+                </div>
+            }
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const buttonEl = document.querySelector(".button") as HTMLButtonElement;
+        const counterEl = document.querySelector(".counter") as HTMLDivElement;
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent);
+
+        assert.strictEqual(counterEl.textContent, "1");
+    });
+
 
 });

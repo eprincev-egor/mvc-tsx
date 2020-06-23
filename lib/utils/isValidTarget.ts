@@ -7,9 +7,10 @@ export function isValidTarget(params: {
     let parent: Element | null = params.target;
     let insideComponent = false;
     let insideSelector = false;
+    const selectorClassName = params.selector.replace(".", "");
 
     while ( parent ) {
-        if ( "." + parent.className === params.selector ) {
+        if ( parent.classList.contains(selectorClassName) ) {
             insideSelector = true;
         }
 
