@@ -56,7 +56,8 @@ export function on(eventType: keyof HTMLElementEventMap, selector: string) {
 
 type KeyOfDOMEvent = (
     keyof Event |
-    keyof MouseEvent 
+    keyof MouseEvent |
+    keyof KeyboardEvent
 )
 /**
  * Get some value from event 
