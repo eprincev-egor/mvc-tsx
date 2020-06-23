@@ -1,12 +1,12 @@
-# MVC-TSX  (WIP, alpha version)
+# MVC-TSX  (alpha version)
 ![CI status](https://circleci.com/gh/eprincev-egor/mvc-tsx.svg?style=shield)
 
-MVC-TSX позволяет писать императивный код для построения реактивных приложений.
+With MVC-TSX you can write imperative code for creating reactive applications.
 
 ```tsx
 import React from "react";
 import * as ReactDOM from "react-dom";
-import {Model, View, Controller, on, arg} from "mvc";
+import {Model, View, Controller, on, arg} from "mvc-tsx";
 
 // define Model
 class LoginModel extends Model {
@@ -20,7 +20,7 @@ class LoginController extends Controller<LoginModel> {
     @on("change", ".Login--loginInput")
     onChangeLogin( @arg("target", "value") inputValue ) {
         this.model.set({
-            name: inputValue
+            login: inputValue
         });
     }
 
