@@ -29451,8 +29451,9 @@ const domEvents = new DOMEvents_1.DOMEvents();
 class View extends React.Component {
     constructor(props) {
         super(props);
-        this.initModel(props.model);
+        this.model = props.model;
         this.createControllers();
+        this.listenModelChanges();
     }
     createControllers() {
         const Constructors = this.controllers();
@@ -29467,8 +29468,7 @@ class View extends React.Component {
         domEvents.addController(controller, this);
         return controller;
     }
-    initModel(model) {
-        this.model = model;
+    listenModelChanges() {
         this.model.on("change", (changes) => {
             this.setState({ changes });
         });

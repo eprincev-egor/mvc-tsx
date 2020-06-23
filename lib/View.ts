@@ -24,8 +24,9 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
     constructor(props: Readonly<{model: TModel}>) {
         super(props);
 
-        this.initModel(props.model);
+        this.model = props.model;
         this.createControllers();
+        this.listenModelChanges();
     }
 
     private createControllers() {
@@ -45,8 +46,7 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         return controller;
     }
 
-    private initModel(model: TModel) {
-        this.model = model;
+    private listenModelChanges() {
         this.model.on("change", (changes) => {
             this.setState({changes});
         });
