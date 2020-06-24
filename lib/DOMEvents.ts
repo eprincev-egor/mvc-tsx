@@ -36,8 +36,8 @@ export class DOMEvents {
         }
 
         const domListener = new DOMListener({
-            eventType: listener.eventType,
-            selector: listener.selector,
+            eventType: listener.eventType as keyof HTMLElementEventMap,
+            selector: listener.selector as string,
             handlerArgs: listener.handlerArgs,
             handler: listener.handler,
             view

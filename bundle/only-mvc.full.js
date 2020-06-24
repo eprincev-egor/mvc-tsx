@@ -163,13 +163,20 @@ exports.isDomListener = exports.isModelListener = exports.getListeners = exports
  * @param selector "model" or simple class selector like are: ".my-class".
  * Selectors like are ".a .b .c" does not supported.
  */
-function on(eventType, selector) {
-    const selectorIsModel = selector === "model";
-    const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-    const isValidSelector = (selectorIsModel ||
-        selectorIsJustClassName);
-    if (!isValidSelector) {
-        throw new Error(`invalid selector "${selector}", selector should be just ".some-class" or "model"`);
+function on(eventTypeOrModel, selectorOrModelEventType) {
+    let eventType;
+    let selector;
+    if (typeof eventTypeOrModel === "string") {
+        eventType = eventTypeOrModel;
+        selector = selectorOrModelEventType;
+        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+        if (!selectorIsJustClassName) {
+            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
+        }
+    }
+    else {
+        eventType = selectorOrModelEventType;
+        selector = eventTypeOrModel;
     }
     return (target, methodName, descriptor) => {
         if (!target._listenersMeta) {
@@ -248,8 +255,7 @@ function findHandlerArguments(controller, methodName) {
     return handlerArgs;
 }
 function isModelListener(listener) {
-    return (listener.eventType === "change" &&
-        listener.selector === "model");
+    return (typeof listener.selector !== "string");
 }
 exports.isModelListener = isModelListener;
 function isDomListener(listener) {

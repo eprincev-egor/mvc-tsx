@@ -1,23 +1,25 @@
 import { Model } from "./Model";
 import { Controller } from "./Controller";
 
+type TModelConstructor = new(...args: any[]) => Model;
+
 export interface IHandlerArgs {
     methodName: string;
     argumentIndex: number;
-    eventPropertyPath: (new(...args: any[]) => Model) | string[]
+    eventPropertyPath: TModelConstructor | string[]
 }
 
 export interface IListenerMeta {
-    eventType: keyof HTMLElementEventMap;
-    selector: string;
+    eventType: string;
+    selector: string | TModelConstructor;
     methodName: string;
 }
 
-export type HandlerArg = string[] | (new (...args: any[]) => Model);
+export type HandlerArg = string[] | TModelConstructor;
 
 export interface IListener {
-    eventType: keyof HTMLElementEventMap;
-    selector: string;
+    eventType: string;
+    selector: string | TModelConstructor;
     handlerArgs: HandlerArg[];
     handler: (...args: any[]) => void;
 }
@@ -28,15 +30,26 @@ export interface IListener {
  * @param selector "model" or simple class selector like are: ".my-class". 
  * Selectors like are ".a .b .c" does not supported.
  */
-export function on(eventType: keyof HTMLElementEventMap, selector: string) {
-    const selectorIsModel = selector === "model";
-    const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-    const isValidSelector = (
-        selectorIsModel ||
-        selectorIsJustClassName
-    );
-    if ( !isValidSelector ) {
-        throw new Error(`invalid selector "${selector}", selector should be just ".some-class" or "model"`);
+export function on(
+    eventTypeOrModel: keyof HTMLElementEventMap | TModelConstructor, 
+    selectorOrModelEventType: string
+) {
+    let eventType!: string;
+    let selector!: string | TModelConstructor;
+
+    if ( typeof eventTypeOrModel === "string" ) {
+        eventType = eventTypeOrModel;
+        selector = selectorOrModelEventType;
+
+        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+
+        if ( !selectorIsJustClassName ) {
+            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
+        }
+    }
+    else {
+        eventType = selectorOrModelEventType;
+        selector = eventTypeOrModel;
     }
 
     return (target: any, methodName: string, descriptor: PropertyDescriptor) => {
@@ -157,8 +170,7 @@ function findHandlerArguments(controller: Controller<any>, methodName: string): 
 
 export function isModelListener(listener: IListener) {
     return (
-        listener.eventType === "change" &&
-        listener.selector === "model"
+        typeof listener.selector !== "string"
     );
 }
 

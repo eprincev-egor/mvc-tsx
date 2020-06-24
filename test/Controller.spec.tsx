@@ -77,7 +77,7 @@ describe("Controller", () => {
         }
 
         class MyController extends Controller<MyModel> {
-            @on("change", "model")
+            @on(MyModel, "change")
             onChangeModel(changes: MyModel) {
                 this.model.set({
                     c: this.model.a + this.model.b
@@ -128,7 +128,7 @@ describe("Controller", () => {
         }
 
         class MyController extends Controller<MyModel> {
-            @on("change", "model")
+            @on(MyModel, "change")
             onChangeModel(changes: MyModel) {
                 this.model.set({
                     c: this.model.a + this.model.b
@@ -619,7 +619,7 @@ describe("Controller", () => {
         }
 
         class ChildController extends Controller<ChildModel> {
-            @on("change", "model")
+            @on(ChildModel, "change")
             onClickButton() {
                 controllerCallsCount++;
             }
@@ -676,36 +676,39 @@ describe("Controller", () => {
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
+                /* istanbul ignore next */
                 @on("click", ".button some")
                 onClickButton() {
                     // 
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button some", selector should be just ".some-class" or "model"`
+            err.message === `invalid selector ".button some", selector should be just className like are ".some-class"`
         );
 
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
+                /* istanbul ignore next */
                 @on("click", ".button>some")
                 onClickButton() {
                     // 
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button>some", selector should be just ".some-class" or "model"`
+            err.message === `invalid selector ".button>some", selector should be just className like are ".some-class"`
         );
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
+                /* istanbul ignore next */
                 @on("click", ".button,.x")
                 onClickButton() {
                     // 
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button,.x", selector should be just ".some-class" or "model"`
+            err.message === `invalid selector ".button,.x", selector should be just className like are ".some-class"`
         );
     });
 
