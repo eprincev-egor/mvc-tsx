@@ -496,15 +496,18 @@ class View extends React.Component {
     createControllers() {
         const Constructors = this.controllers();
         this.controllersInstances = [];
+        const originalEmit = this.model.emit;
+        let CurrentConstructor;
+        this.model.emit = (eventType) => {
+            throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
+        };
         for (const Constructor of Constructors) {
-            const controller = this.createController(Constructor);
+            CurrentConstructor = Constructor;
+            const controller = new Constructor(this.model);
+            domEvents.addController(controller, this);
             this.controllersInstances.push(controller);
         }
-    }
-    createController(ControllerConstructor) {
-        const controller = new ControllerConstructor(this.model);
-        domEvents.addController(controller, this);
-        return controller;
+        this.model.emit = originalEmit;
     }
     listenModelChanges() {
         this.model.on("change", (changes) => {

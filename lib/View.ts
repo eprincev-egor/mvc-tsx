@@ -33,17 +33,23 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         const Constructors = this.controllers();
         this.controllersInstances = [];
 
+        const originalEmit = this.model.emit;
+        let CurrentConstructor: any;
+
+        this.model.emit = (eventType: string) => {
+            throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
+        };
+
         for (const Constructor of Constructors) {
-            const controller = this.createController(Constructor);
+            CurrentConstructor = Constructor;
+
+            const controller = new Constructor(this.model);
+            domEvents.addController(controller, this);
+            
             this.controllersInstances.push(controller);
         }
-    }
 
-    private createController(ControllerConstructor: new (model: TModel) => Controller<TModel>) {
-        const controller = new ControllerConstructor(this.model);
-        domEvents.addController(controller, this);
-
-        return controller;
+        this.model.emit = originalEmit;
     }
 
     private listenModelChanges() {

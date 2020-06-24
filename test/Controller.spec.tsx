@@ -336,6 +336,8 @@ describe("Controller", () => {
     });
 
     it("using controller without events", () => {
+        let controller!: MyController;
+
         class MyModel extends Model {
             value: number = 0;
         }
@@ -344,7 +346,11 @@ describe("Controller", () => {
             constructor(model: MyModel) {
                 super(model);
                 
-                model.set({
+                controller = this;        
+            }
+
+            setValue(value: number) {
+                this.model.set({
                     value: 30
                 });
             }
@@ -366,6 +372,8 @@ describe("Controller", () => {
         act(() => {
             render(<MyView model={testModel}/>, container);
         });
+
+        controller.setValue(30);
 
         const valueEl = document.querySelector(".value") as HTMLDivElement;
 
@@ -753,6 +761,64 @@ describe("Controller", () => {
         buttonEl.dispatchEvent(clickEvent);
 
         assert.strictEqual(counterEl.textContent, "1");
+    });
+
+    it("listen custom model event", () => {
+        let callArgs: any[] = [];
+
+        class MyModel extends Model {}
+
+        class MyController extends Controller<MyModel> {
+            @on(MyModel, "custom")
+            onCustomEvent(...args: any[]) {
+                callArgs = args;
+            }
+        }
+
+        const model = new MyModel();
+        const controller = new MyController(model);
+
+        model.emit("custom", 1, 2);
+        assert.deepStrictEqual(callArgs, [1, 2]);
+    });
+
+    it("error on model event while controllers instances are being created", () => {
+        
+        class MyModel extends Model {}
+
+        class FirstController extends Controller<MyModel> {
+            constructor(model: MyModel) {
+                super(model);
+
+                model.emit("custom", "test");
+            }
+        }
+        class SecondController extends Controller<MyModel> {}
+
+        class MyView extends View<MyModel> {
+            controllers() {
+                return [
+                    FirstController,
+                    SecondController
+                ];
+            }
+
+            /* istanbul ignore next */
+            template(model: MyModel) {
+                return <div></div>
+            }
+        }
+
+        const testModel = new MyModel();
+
+        assert.throws(() => {
+            act(() => {
+                render(<MyView model={testModel}/>, container);
+            });
+        }, err =>
+            /FirstController: it is forbidden to emit any model event inside the controller constructor\. Triggered "custom"/
+                .test(err.message)
+        );
     });
 
 
