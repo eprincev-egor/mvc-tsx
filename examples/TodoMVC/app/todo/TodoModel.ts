@@ -22,15 +22,17 @@ export class TodoModel extends Model {
         return todo;
     }
 
-    status: TodoStatus = TodoStatus.active;
+    status: TodoStatus;
     id: number;
     name: string;
+    editing: boolean = false;
     
-    constructor(name: string) {
+    constructor(name: string, status = TodoStatus.active) {
         super();
 
         this.id = ++uid;
         this.name = name;
+        this.status = status;
     }
 
     isActive() {
@@ -41,11 +43,46 @@ export class TodoModel extends Model {
         return this.status === TodoStatus.completed;
     }
 
+    toggleStatus() {
+        const todo: TodoModel = this;
+        const newStatus = (
+            todo.status === TodoStatus.active ?
+                TodoStatus.completed :
+                TodoStatus.active
+        );
+        
+        todo.setStatus(newStatus);
+    }
+
     setStatus(newStatus: TodoStatus) {
         const todo: TodoModel = this;
         
         todo.set({
             status: newStatus
+        });
+    }
+
+    setName(newName: string) {
+        const todo: TodoModel = this;
+        
+        todo.set({
+            name: newName
+        });
+    }
+
+    enableEdit() {
+        const todo: TodoModel = this;
+        
+        todo.set({
+            editing: true
+        });
+    }
+
+    disableEdit() {
+        const todo: TodoModel = this;
+        
+        todo.set({
+            editing: false
         });
     }
 

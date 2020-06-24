@@ -1,26 +1,30 @@
 import { Model } from "mvc-tsx";
-import { TodoStatus, TodoModel, ITodoRow } from "./todo/TodoModel";
+import { TodoStatus, TodoModel } from "./todo/TodoModel";
 
 export class AppModel extends Model {
     filterStatus: TodoStatus | null = null;
     todos: TodoModel[] = [];
     activeTodosCount: number = 0;
 
-    createTodo(todoName: string) {
+    createTodo(todoName: string, status = TodoStatus.active) {
         const app: AppModel = this;
 
-        const todo = new TodoModel(todoName);
+        const todo = new TodoModel(todoName, status);
         const newTodos = [...app.todos, todo];
 
         app.set({
             todos: newTodos
         });
         app.recalculateActiveTodosCount();
+
+        app.emit("createTodo", todo);
     }
 
     removeTodo(todoId: number) {
         const app: AppModel = this;
-        const todo = app.getTodo(todoId);
+        const todo = app.todos.find(someTodo =>
+            someTodo.id === todoId
+        );
 
         if ( todo ) {
             const newTodos = [...app.todos];
@@ -32,16 +36,8 @@ export class AppModel extends Model {
                 todos: newTodos
             });
             app.recalculateActiveTodosCount();
-        }
-    }
 
-    setTodoStatus(todoId: number, newStatus: TodoStatus) {
-        const app: AppModel = this;
-        const todo = app.getTodo(todoId);
-        
-        if ( todo ) {
-            todo.setStatus(newStatus);
-            app.recalculateActiveTodosCount();
+            app.emit("removeTodo", todo);
         }
     }
 
@@ -54,36 +50,48 @@ export class AppModel extends Model {
         app.recalculateActiveTodosCount();
     }
 
-    setTodosRows(todosRows: ITodoRow[]) {
+    isAllCompleted() {
         const app: AppModel = this;
-        const todos = todosRows.map(row =>
-            TodoModel.fromJSON(row)
-        );
+        const activeTodosCount = app.activeTodosCount;
+        const allTodosCount = app.todos.length;
         
+        const isAllCompleted = (
+            allTodosCount > 0 &&
+            activeTodosCount === 0
+        );
+
+        return isAllCompleted;
+    }
+
+    hasCompletedTodo() {
+        const app: AppModel = this;
+        const hasCompletedTodo = app.todos.some(todo =>
+            todo.isCompleted()
+        );
+
+        return hasCompletedTodo;
+    }
+
+    clearCompleted() {
+        const app: AppModel = this;
+        const removedTodos = app.todos.filter(todo =>
+            todo.isCompleted()
+        );
+        const newTodos = app.todos.filter(todo =>
+            todo.isActive()
+        );
+
         app.set({
-            todos
+            todos: newTodos
         });
         app.recalculateActiveTodosCount();
+
+        for (const todo of removedTodos) {
+            app.emit("removeTodo", todo);
+        }
     }
 
-    getTodosRows(): ITodoRow[] {
-        const app: AppModel = this;
-        const rows = app.todos.map(todo =>
-            todo.toJSON()
-        );
-        return rows;
-    }
-
-    getTodo(todoId: number): TodoModel | undefined {
-        const app: AppModel = this;
-        const todo = app.todos.find(someTodo =>
-            someTodo.id === todoId
-        );
-
-        return todo;
-    }
-
-    private recalculateActiveTodosCount() {
+    recalculateActiveTodosCount() {
         const app: AppModel = this;
         const newActiveTodosCount = app.calculateActiveTodosCount();
 

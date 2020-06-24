@@ -127,18 +127,19 @@ class AppModel extends mvc_tsx_1.Model {
         this.todos = [];
         this.activeTodosCount = 0;
     }
-    createTodo(todoName) {
+    createTodo(todoName, status = TodoModel_1.TodoStatus.active) {
         const app = this;
-        const todo = new TodoModel_1.TodoModel(todoName);
+        const todo = new TodoModel_1.TodoModel(todoName, status);
         const newTodos = [...app.todos, todo];
         app.set({
             todos: newTodos
         });
         app.recalculateActiveTodosCount();
+        app.emit("createTodo", todo);
     }
     removeTodo(todoId) {
         const app = this;
-        const todo = app.getTodo(todoId);
+        const todo = app.todos.find(someTodo => someTodo.id === todoId);
         if (todo) {
             const newTodos = [...app.todos];
             const todoIndex = newTodos.indexOf(todo);
@@ -147,14 +148,7 @@ class AppModel extends mvc_tsx_1.Model {
                 todos: newTodos
             });
             app.recalculateActiveTodosCount();
-        }
-    }
-    setTodoStatus(todoId, newStatus) {
-        const app = this;
-        const todo = app.getTodo(todoId);
-        if (todo) {
-            todo.setStatus(newStatus);
-            app.recalculateActiveTodosCount();
+            app.emit("removeTodo", todo);
         }
     }
     setAllTodosStatus(newStatus) {
@@ -162,23 +156,30 @@ class AppModel extends mvc_tsx_1.Model {
         app.todos.forEach(todo => todo.setStatus(newStatus));
         app.recalculateActiveTodosCount();
     }
-    setTodosRows(todosRows) {
+    isAllCompleted() {
         const app = this;
-        const todos = todosRows.map(row => TodoModel_1.TodoModel.fromJSON(row));
+        const activeTodosCount = app.activeTodosCount;
+        const allTodosCount = app.todos.length;
+        const isAllCompleted = (allTodosCount > 0 &&
+            activeTodosCount === 0);
+        return isAllCompleted;
+    }
+    hasCompletedTodo() {
+        const app = this;
+        const hasCompletedTodo = app.todos.some(todo => todo.isCompleted());
+        return hasCompletedTodo;
+    }
+    clearCompleted() {
+        const app = this;
+        const removedTodos = app.todos.filter(todo => todo.isCompleted());
+        const newTodos = app.todos.filter(todo => todo.isActive());
         app.set({
-            todos
+            todos: newTodos
         });
         app.recalculateActiveTodosCount();
-    }
-    getTodosRows() {
-        const app = this;
-        const rows = app.todos.map(todo => todo.toJSON());
-        return rows;
-    }
-    getTodo(todoId) {
-        const app = this;
-        const todo = app.todos.find(someTodo => someTodo.id === todoId);
-        return todo;
+        for (const todo of removedTodos) {
+            app.emit("removeTodo", todo);
+        }
     }
     recalculateActiveTodosCount() {
         const app = this;
@@ -214,28 +215,26 @@ const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const TodoView_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoView.tsx");
 const AddTodoController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/AddTodoController.ts");
 const RemoveTodoController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/RemoveTodoController.ts");
-const ToggleStatusController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ToggleStatusController.ts");
+const ToggleAllTodosStatusController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ToggleAllTodosStatusController.ts");
 const LocalStorageController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/LocalStorageController.ts");
+const ActiveCountController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ActiveCountController.ts");
+const ClearCompletedController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ClearCompletedController.ts");
 __webpack_require__("./examples/TodoMVC/app/App.css");
 class AppView extends mvc_tsx_1.View {
     controllers() {
         return [
             AddTodoController_1.AddTodoController,
             RemoveTodoController_1.RemoveTodoController,
-            ToggleStatusController_1.ToggleStatusController,
-            LocalStorageController_1.LocalStorageController
+            ToggleAllTodosStatusController_1.ToggleAllTodosStatusController,
+            LocalStorageController_1.LocalStorageController,
+            ActiveCountController_1.ActiveCountController,
+            ClearCompletedController_1.ClearCompletedController
         ];
     }
     template(app) {
-        return (react_1.default.createElement("section", { className: "todoapp" },
-            react_1.default.createElement("header", { className: "header" },
-                react_1.default.createElement("h1", null, "todos"),
-                react_1.default.createElement("input", { className: "new-todo AddTodo", placeholder: "What needs to be done?", autoFocus: true, defaultValue: "" })),
-            react_1.default.createElement("section", { className: "main" },
-                react_1.default.createElement("input", { className: "toggle-all ToggleAllStatus", id: "toggle-all", type: "checkbox", defaultChecked: false }),
-                react_1.default.createElement("label", { htmlFor: "toggle-all" }, "Mark all as complete"),
-                react_1.default.createElement("ul", { className: "todo-list" }, app.todos.map(item => react_1.default.createElement(TodoView_1.TodoView, { model: item, key: item.id })))),
-            react_1.default.createElement("footer", { className: "footer" },
+        let footer;
+        if (app.todos.length) {
+            footer = (react_1.default.createElement("footer", { className: "footer" },
                 react_1.default.createElement("span", { className: "todo-count" },
                     react_1.default.createElement("strong", null, app.activeTodosCount),
                     " ",
@@ -247,7 +246,19 @@ class AppView extends mvc_tsx_1.View {
                     react_1.default.createElement("li", null,
                         react_1.default.createElement("a", { href: "#/active" }, "Active")),
                     react_1.default.createElement("li", null,
-                        react_1.default.createElement("a", { href: "#/completed" }, "Completed"))))));
+                        react_1.default.createElement("a", { href: "#/completed" }, "Completed"))),
+                app.hasCompletedTodo() ? (react_1.default.createElement("span", { className: "todo-clear" },
+                    react_1.default.createElement("button", { className: "clear-completed ClearCompleted" }, "Clear completed"))) : null));
+        }
+        return (react_1.default.createElement("section", { className: "todoapp" },
+            react_1.default.createElement("header", { className: "header" },
+                react_1.default.createElement("h1", null, "todos"),
+                react_1.default.createElement("input", { className: "new-todo AddTodo", placeholder: "What needs to be done?", autoFocus: true, defaultValue: "" })),
+            react_1.default.createElement("section", { className: "main" },
+                react_1.default.createElement("input", { className: "toggle-all ToggleAllStatus", id: "toggle-all", type: "checkbox", checked: app.isAllCompleted(), onChange: (e) => 1 }),
+                react_1.default.createElement("label", { htmlFor: "toggle-all" }, "Mark all as complete"),
+                react_1.default.createElement("ul", { className: "todo-list" }, app.todos.map(item => react_1.default.createElement(TodoView_1.TodoView, { model: item, key: item.id })))),
+            footer));
     }
     getItemsWord() {
         const app = this.model;
@@ -260,6 +271,64 @@ class AppView extends mvc_tsx_1.View {
     }
 }
 exports.AppView = AppView;
+
+
+/***/ }),
+
+/***/ "./examples/TodoMVC/app/controllers/ActiveCountController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ActiveCountController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const AppModel_1 = __webpack_require__("./examples/TodoMVC/app/AppModel.ts");
+const TodoModel_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoModel.ts");
+class ActiveCountController extends mvc_tsx_1.Controller {
+    constructor(app) {
+        super(app);
+        this.onChangeTodo = this.onChangeTodo.bind(this);
+    }
+    onCreateTodo(todo) {
+        this.listenTodo(todo);
+    }
+    onRemoveTodo(todo) {
+        this.stopListenTodo(todo);
+    }
+    onChangeTodo() {
+        const app = this.model;
+        app.recalculateActiveTodosCount();
+    }
+    listenTodo(todo) {
+        todo.on("change", this.onChangeTodo);
+    }
+    stopListenTodo(todo) {
+        todo.off("change", this.onChangeTodo);
+    }
+}
+__decorate([
+    mvc_tsx_1.on(AppModel_1.AppModel, "createTodo"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [TodoModel_1.TodoModel]),
+    __metadata("design:returntype", void 0)
+], ActiveCountController.prototype, "onCreateTodo", null);
+__decorate([
+    mvc_tsx_1.on(AppModel_1.AppModel, "removeTodo"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [TodoModel_1.TodoModel]),
+    __metadata("design:returntype", void 0)
+], ActiveCountController.prototype, "onRemoveTodo", null);
+exports.ActiveCountController = ActiveCountController;
 
 
 /***/ }),
@@ -284,10 +353,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AddTodoController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-const ENTER_KEY_CODE = 13;
+const keyCodes_1 = __webpack_require__("./examples/TodoMVC/app/keyCodes.ts");
 class AddTodoController extends mvc_tsx_1.Controller {
     onKeyupInput(keyCode, input) {
-        if (keyCode === ENTER_KEY_CODE) {
+        if (keyCode === keyCodes_1.ENTER_KEY_CODE) {
             this.onPressEnter(input);
         }
     }
@@ -316,6 +385,40 @@ exports.AddTodoController = AddTodoController;
 
 /***/ }),
 
+/***/ "./examples/TodoMVC/app/controllers/ClearCompletedController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClearCompletedController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+class ClearCompletedController extends mvc_tsx_1.Controller {
+    onClickClearCompleted() {
+        const app = this.model;
+        app.clearCompleted();
+    }
+}
+__decorate([
+    mvc_tsx_1.on("click", ".ClearCompleted"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ClearCompletedController.prototype, "onClickClearCompleted", null);
+exports.ClearCompletedController = ClearCompletedController;
+
+
+/***/ }),
+
 /***/ "./examples/TodoMVC/app/controllers/LocalStorageController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -333,12 +436,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocalStorageController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const AppModel_1 = __webpack_require__("./examples/TodoMVC/app/AppModel.ts");
+const TodoModel_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoModel.ts");
 class LocalStorageController extends mvc_tsx_1.Controller {
     constructor(app) {
         super(app);
-        this.loadTodos();
+        this.loading = false;
+        this.onChangeTodo = this.onChangeTodo.bind(this);
+        setTimeout(() => {
+            this.loadTodos();
+        });
     }
-    onChangeModel() {
+    onCreateTodo(todo) {
+        this.saveTodos();
+        this.listenTodo(todo);
+    }
+    onRemoveTodo(todo) {
+        this.saveTodos();
+        this.stopListenTodo(todo);
+    }
+    onChangeTodo() {
         this.saveTodos();
     }
     loadTodos() {
@@ -346,28 +463,48 @@ class LocalStorageController extends mvc_tsx_1.Controller {
         if (!todosJSON) {
             return;
         }
+        this.loading = true;
         try {
             const app = this.model;
-            const todos = JSON.parse(todosJSON);
-            app.setTodosRows(todos);
+            const todosRows = JSON.parse(todosJSON);
+            for (const row of todosRows) {
+                app.createTodo(row.name, row.status);
+            }
         }
         catch (err) {
+            // tslint:disable-next-line: no-console
             console.error("failed parse todos from localStorage", err);
         }
+        this.loading = false;
     }
     saveTodos() {
+        if (this.loading) {
+            return;
+        }
         const app = this.model;
-        const todosRows = app.getTodosRows();
+        const todosRows = app.todos.map(todo => todo.toJSON());
         const todosJSON = JSON.stringify(todosRows);
         localStorage.setItem("todos", todosJSON);
     }
+    listenTodo(todo) {
+        todo.on("change", this.onChangeTodo);
+    }
+    stopListenTodo(todo) {
+        todo.off("change", this.onChangeTodo);
+    }
 }
 __decorate([
-    mvc_tsx_1.on("change", "model"),
+    mvc_tsx_1.on(AppModel_1.AppModel, "createTodo"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [TodoModel_1.TodoModel]),
     __metadata("design:returntype", void 0)
-], LocalStorageController.prototype, "onChangeModel", null);
+], LocalStorageController.prototype, "onCreateTodo", null);
+__decorate([
+    mvc_tsx_1.on(AppModel_1.AppModel, "removeTodo"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [TodoModel_1.TodoModel]),
+    __metadata("design:returntype", void 0)
+], LocalStorageController.prototype, "onRemoveTodo", null);
 exports.LocalStorageController = LocalStorageController;
 
 
@@ -412,7 +549,7 @@ exports.RemoveTodoController = RemoveTodoController;
 
 /***/ }),
 
-/***/ "./examples/TodoMVC/app/controllers/ToggleStatusController.ts":
+/***/ "./examples/TodoMVC/app/controllers/ToggleAllTodosStatusController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -430,43 +567,37 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToggleStatusController = void 0;
+exports.ToggleAllTodosStatusController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const TodoModel_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoModel.ts");
-class ToggleStatusController extends mvc_tsx_1.Controller {
-    onChangeTodoCheckbox(todo, checked) {
-        const app = this.model;
-        const newStatus = toggleStatus(checked);
-        app.setTodoStatus(todo.id, newStatus);
-    }
+class ToggleAllTodosStatusController extends mvc_tsx_1.Controller {
     onChangeToggleAll(checked) {
         const app = this.model;
-        const newStatus = toggleStatus(checked);
+        const newStatus = app.isAllCompleted() ? TodoModel_1.TodoStatus.active : TodoModel_1.TodoStatus.completed;
         app.setAllTodosStatus(newStatus);
     }
 }
-__decorate([
-    mvc_tsx_1.on("change", ".ToggleStatus"),
-    __param(0, mvc_tsx_1.arg(TodoModel_1.TodoModel)),
-    __param(1, mvc_tsx_1.arg("target", "checked")),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [TodoModel_1.TodoModel, Boolean]),
-    __metadata("design:returntype", void 0)
-], ToggleStatusController.prototype, "onChangeTodoCheckbox", null);
 __decorate([
     mvc_tsx_1.on("change", ".ToggleAllStatus"),
     __param(0, mvc_tsx_1.arg("target", "checked")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Boolean]),
     __metadata("design:returntype", void 0)
-], ToggleStatusController.prototype, "onChangeToggleAll", null);
-exports.ToggleStatusController = ToggleStatusController;
-function toggleStatus(checked) {
-    const newStatus = (checked ?
-        TodoModel_1.TodoStatus.active :
-        TodoModel_1.TodoStatus.completed);
-    return newStatus;
-}
+], ToggleAllTodosStatusController.prototype, "onChangeToggleAll", null);
+exports.ToggleAllTodosStatusController = ToggleAllTodosStatusController;
+
+
+/***/ }),
+
+/***/ "./examples/TodoMVC/app/keyCodes.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ESCAPE_KEY_CODE = exports.ENTER_KEY_CODE = void 0;
+exports.ENTER_KEY_CODE = 13;
+exports.ESCAPE_KEY_CODE = 27;
 
 
 /***/ }),
@@ -486,11 +617,12 @@ var TodoStatus;
 })(TodoStatus = exports.TodoStatus || (exports.TodoStatus = {}));
 let uid = 0;
 class TodoModel extends mvc_tsx_1.Model {
-    constructor(name) {
+    constructor(name, status = TodoStatus.active) {
         super();
-        this.status = TodoStatus.active;
+        this.editing = false;
         this.id = ++uid;
         this.name = name;
+        this.status = status;
     }
     static fromJSON(row) {
         const todo = new TodoModel(row.name);
@@ -504,10 +636,35 @@ class TodoModel extends mvc_tsx_1.Model {
     isCompleted() {
         return this.status === TodoStatus.completed;
     }
+    toggleStatus() {
+        const todo = this;
+        const newStatus = (todo.status === TodoStatus.active ?
+            TodoStatus.completed :
+            TodoStatus.active);
+        todo.setStatus(newStatus);
+    }
     setStatus(newStatus) {
         const todo = this;
         todo.set({
             status: newStatus
+        });
+    }
+    setName(newName) {
+        const todo = this;
+        todo.set({
+            name: newName
+        });
+    }
+    enableEdit() {
+        const todo = this;
+        todo.set({
+            editing: true
+        });
+    }
+    disableEdit() {
+        const todo = this;
+        todo.set({
+            editing: false
         });
     }
     toJSON() {
@@ -535,27 +692,154 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TodoView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
+const react_dom_1 = __importDefault(__webpack_require__("react-dom"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const TodoModel_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoModel.ts");
+const ToggleStatusController_1 = __webpack_require__("./examples/TodoMVC/app/todo/controllers/ToggleStatusController.ts");
+const EditNameController_1 = __webpack_require__("./examples/TodoMVC/app/todo/controllers/EditNameController.ts");
 class TodoView extends mvc_tsx_1.View {
-    template(todo) {
-        return (react_1.default.createElement("li", { className: this.getStatusClassName(todo) },
-            react_1.default.createElement("div", { className: "view" },
-                react_1.default.createElement("input", { className: "toggle ToggleStatus", type: "checkbox", checked: todo.isCompleted(), onChange: (e) => 1 }),
-                react_1.default.createElement("label", null, todo.name),
-                react_1.default.createElement("button", { className: "destroy RemoveTodo" })),
-            react_1.default.createElement("input", { className: "edit", defaultValue: todo.name })));
+    controllers() {
+        return [
+            ToggleStatusController_1.ToggleStatusController,
+            EditNameController_1.EditNameController
+        ];
     }
-    getStatusClassName(todo) {
-        if (todo.status === TodoModel_1.TodoStatus.active) {
-            return "active";
+    template(todo) {
+        let content;
+        if (todo.editing) {
+            content = (react_1.default.createElement("input", { className: "edit EditNameInput", defaultValue: todo.name, ref: "EditNameInput" }));
         }
         else {
-            return "completed";
+            content = (react_1.default.createElement("div", { className: "view" },
+                react_1.default.createElement("input", { className: "toggle ToggleStatus", type: "checkbox", checked: todo.isCompleted(), onChange: (e) => 1 }),
+                react_1.default.createElement("label", { className: "StartEdit" }, todo.name),
+                react_1.default.createElement("button", { className: "destroy RemoveTodo" })));
         }
+        return (react_1.default.createElement("li", { className: this.getStatusClassName(todo) }, content));
+    }
+    componentDidUpdate() {
+        const todo = this.model;
+        if (todo.editing) {
+            const inputEl = react_dom_1.default.findDOMNode(this.refs.EditNameInput);
+            if (inputEl) {
+                inputEl.focus();
+                inputEl.setSelectionRange(todo.name.length, todo.name.length);
+            }
+        }
+    }
+    getStatusClassName(todo) {
+        const classes = [];
+        if (todo.status === TodoModel_1.TodoStatus.active) {
+            classes.push("active");
+        }
+        else {
+            classes.push("completed");
+        }
+        if (todo.editing) {
+            classes.push("editing");
+        }
+        return classes.join(" ");
     }
 }
 exports.TodoView = TodoView;
+
+
+/***/ }),
+
+/***/ "./examples/TodoMVC/app/todo/controllers/EditNameController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EditNameController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const keyCodes_1 = __webpack_require__("./examples/TodoMVC/app/keyCodes.ts");
+class EditNameController extends mvc_tsx_1.Controller {
+    onStartEdit(target) {
+        const todo = this.model;
+        todo.enableEdit();
+    }
+    onKeyupEditInput(keyCode, inputValue) {
+        if (keyCode === keyCodes_1.ENTER_KEY_CODE) {
+            this.onPressEnter(inputValue);
+        }
+        if (keyCode === keyCodes_1.ESCAPE_KEY_CODE) {
+            this.onPressEscape();
+        }
+    }
+    onPressEnter(inputValue) {
+        const todo = this.model;
+        todo.disableEdit();
+        todo.setName(inputValue);
+    }
+    onPressEscape() {
+        const todo = this.model;
+        todo.disableEdit();
+    }
+}
+__decorate([
+    mvc_tsx_1.on("dblclick", ".StartEdit"),
+    __param(0, mvc_tsx_1.arg("target")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [HTMLDivElement]),
+    __metadata("design:returntype", void 0)
+], EditNameController.prototype, "onStartEdit", null);
+__decorate([
+    mvc_tsx_1.on("keyup", ".EditNameInput"),
+    __param(0, mvc_tsx_1.arg("keyCode")),
+    __param(1, mvc_tsx_1.arg("target", "value")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", void 0)
+], EditNameController.prototype, "onKeyupEditInput", null);
+exports.EditNameController = EditNameController;
+
+
+/***/ }),
+
+/***/ "./examples/TodoMVC/app/todo/controllers/ToggleStatusController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ToggleStatusController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+class ToggleStatusController extends mvc_tsx_1.Controller {
+    onChangeTodoCheckbox() {
+        const todo = this.model;
+        todo.toggleStatus();
+    }
+}
+__decorate([
+    mvc_tsx_1.on("change", ".ToggleStatus"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ToggleStatusController.prototype, "onChangeTodoCheckbox", null);
+exports.ToggleStatusController = ToggleStatusController;
 
 
 /***/ }),

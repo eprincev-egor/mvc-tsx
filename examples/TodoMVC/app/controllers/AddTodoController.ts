@@ -1,7 +1,7 @@
 import { Controller, on, arg } from "mvc-tsx";
 import { AppModel } from "../AppModel";
+import { ENTER_KEY_CODE } from "../keyCodes";
 
-const ENTER_KEY_CODE = 13;
 interface IInput {
     value: string;
 }

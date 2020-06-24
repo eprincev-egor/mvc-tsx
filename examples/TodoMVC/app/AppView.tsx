@@ -4,8 +4,10 @@ import { AppModel } from "./AppModel";
 import { TodoView } from "./todo/TodoView";
 import { AddTodoController } from "./controllers/AddTodoController";
 import { RemoveTodoController } from "./controllers/RemoveTodoController";
-import { ToggleStatusController } from "./controllers/ToggleStatusController";
+import { ToggleAllTodosStatusController } from "./controllers/ToggleAllTodosStatusController";
 import { LocalStorageController } from "./controllers/LocalStorageController";
+import { ActiveCountController } from "./controllers/ActiveCountController";
+import { ClearCompletedController } from "./controllers/ClearCompletedController";
 import "./App.css";
 
 export class AppView extends View<AppModel> {
@@ -14,12 +16,44 @@ export class AppView extends View<AppModel> {
         return [
             AddTodoController,
             RemoveTodoController,
-            ToggleStatusController,
-            LocalStorageController
+            ToggleAllTodosStatusController,
+            LocalStorageController,
+            ActiveCountController,
+            ClearCompletedController
         ];
     }
     
     template(app: AppModel) {
+        let footer: JSX.Element | undefined;
+        
+        if ( app.todos.length ) {
+            footer = (
+                <footer className="footer">
+                    <span className="todo-count">
+                        <strong>{app.activeTodosCount}</strong> {this.getItemsWord()} left
+                    </span>
+
+                    <ul className="filters">
+                        <li>
+                            <a className="selected" href="#/">All</a>
+                        </li>
+                        <li>
+                            <a href="#/active">Active</a>
+                        </li>
+                        <li>
+                            <a href="#/completed">Completed</a>
+                        </li>
+                    </ul>
+
+                    {app.hasCompletedTodo() ? (
+                        <span className="todo-clear">
+                            <button className="clear-completed ClearCompleted">Clear completed</button>
+                        </span>
+                    ): null}
+                </footer>
+            );
+        }
+
         return (
             <section className="todoapp">
 
@@ -38,7 +72,8 @@ export class AppView extends View<AppModel> {
                         className="toggle-all ToggleAllStatus" 
                         id="toggle-all" 
                         type="checkbox"
-                        defaultChecked={false}
+                        checked={app.isAllCompleted()}
+                        onChange={(e) => 1}
                     />
                     <label htmlFor="toggle-all">Mark all as complete</label>
 
@@ -49,24 +84,7 @@ export class AppView extends View<AppModel> {
                     </ul>
                 </section>
 
-                <footer className="footer">
-                    <span className="todo-count">
-                        <strong>{app.activeTodosCount}</strong> {this.getItemsWord()} left
-                    </span>
-
-                    <ul className="filters">
-                        <li>
-                            <a className="selected" href="#/">All</a>
-                        </li>
-                        <li>
-                            <a href="#/active">Active</a>
-                        </li>
-                        <li>
-                            <a href="#/completed">Completed</a>
-                        </li>
-                    </ul>
-                </footer>
-
+                {footer}
         </section>
         );
     }

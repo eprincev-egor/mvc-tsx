@@ -1,15 +1,35 @@
 import { Controller, on } from "mvc-tsx";
 import { AppModel } from "../AppModel";
+import { TodoModel, ITodoRow } from "../todo/TodoModel";
 
 export class LocalStorageController extends Controller<AppModel> {
-    
+    private loading: boolean = false;
+
     constructor(app: AppModel) {
         super(app);
-        this.loadTodos();
+        
+        this.onChangeTodo = this.onChangeTodo.bind(this);
+
+        setTimeout(() => {
+            this.loadTodos();
+        });
     }
 
-    @on("change", "model")
-    onChangeModel() {
+    @on(AppModel, "createTodo")
+    onCreateTodo(todo: TodoModel) {
+
+        this.saveTodos();
+        this.listenTodo(todo);
+    }
+
+    @on(AppModel, "removeTodo")
+    onRemoveTodo(todo: TodoModel) {
+
+        this.saveTodos();
+        this.stopListenTodo(todo);
+    }
+
+    private onChangeTodo() {
         this.saveTodos();
     }
 
@@ -19,22 +39,41 @@ export class LocalStorageController extends Controller<AppModel> {
             return;
         }
 
+        this.loading = true;
         try {
             const app = this.model;
-            const todos = JSON.parse(todosJSON);
+            const todosRows = JSON.parse(todosJSON) as ITodoRow[];
 
-            app.setTodosRows(todos);
+            for (const row of todosRows) {
+                app.createTodo(row.name, row.status);
+            }
+
         } catch(err) {
+            // tslint:disable-next-line: no-console
             console.error("failed parse todos from localStorage", err);
         }
+        this.loading = false;
     }
 
     private saveTodos() {
+        if ( this.loading ) {
+            return;
+        }
+        
         const app = this.model;
-        const todosRows = app.getTodosRows();
+        const todosRows = app.todos.map(todo =>
+            todo.toJSON()
+        );
         const todosJSON = JSON.stringify(todosRows);
 
         localStorage.setItem("todos", todosJSON);
     }
 
+    private listenTodo(todo: TodoModel) {
+        todo.on("change", this.onChangeTodo);
+    }
+
+    private stopListenTodo(todo: TodoModel) {
+        todo.off("change", this.onChangeTodo);
+    }
 }
