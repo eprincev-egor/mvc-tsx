@@ -821,5 +821,84 @@ describe("Controller", () => {
         );
     });
 
+    it("listen blur input", () => {
+        let hasCall = false;
+
+        class MyModel extends Model {}
+
+        class MyController extends Controller<MyModel> {
+            @on("blur", ".input")
+            onBlurInput() {
+                hasCall = true;
+            }
+        }
+
+        class MyView extends View<MyModel> {
+            controllers() {
+                return [
+                    MyController
+                ];
+            }
+
+            template(model: MyModel) {
+                return <div>
+                    <input className="input"/>
+                </div>
+            }
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const inputEl = document.querySelector(".input") as HTMLInputElement;
+
+        const blurEvent = new window.Event("focusout", {bubbles: true});
+        inputEl.dispatchEvent(blurEvent);
+
+        assert.strictEqual(hasCall, true);
+    });
+
+
+    it("listen focus input", () => {
+        let hasCall = false;
+
+        class MyModel extends Model {}
+
+        class MyController extends Controller<MyModel> {
+            @on("focus", ".input")
+            onFocusInput() {
+                hasCall = true;
+            }
+        }
+
+        class MyView extends View<MyModel> {
+            controllers() {
+                return [
+                    MyController
+                ];
+            }
+
+            template(model: MyModel) {
+                return <div>
+                    <input className="input"/>
+                </div>
+            }
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const inputEl = document.querySelector(".input") as HTMLInputElement;
+
+        const blurEvent = new window.Event("focusin", {bubbles: true});
+        inputEl.dispatchEvent(blurEvent);
+
+        assert.strictEqual(hasCall, true);
+    });
+
 
 });

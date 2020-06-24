@@ -345,7 +345,7 @@ const getPropertyFromEvent_1 = __webpack_require__("./lib/utils/getPropertyFromE
 const getNearestModelByEvent_1 = __webpack_require__("./lib/utils/getNearestModelByEvent.ts");
 class DOMListener {
     constructor(params) {
-        this.eventType = params.eventType;
+        this.realEventType = fixFocusAndBlur(params.eventType);
         this.selector = params.selector;
         this.handlerArgs = params.handlerArgs;
         this.handler = params.handler;
@@ -355,10 +355,10 @@ class DOMListener {
         this.domHandler = (event) => {
             this.onDOMEvent(event);
         };
-        document.addEventListener(this.eventType, this.domHandler);
+        document.addEventListener(this.realEventType, this.domHandler);
     }
     destroy() {
-        document.removeEventListener(this.eventType, this.domHandler);
+        document.removeEventListener(this.realEventType, this.domHandler);
         delete this.view;
         delete this.handler;
         delete this.domHandler;
@@ -398,6 +398,16 @@ class DOMListener {
     }
 }
 exports.DOMListener = DOMListener;
+// blur and focus do not bubbling
+function fixFocusAndBlur(eventType) {
+    if (eventType === "blur") {
+        return "focusout";
+    }
+    if (eventType === "focus") {
+        return "focusin";
+    }
+    return eventType;
+}
 
 
 /***/ }),

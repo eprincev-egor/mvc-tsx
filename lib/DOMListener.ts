@@ -15,14 +15,14 @@ interface IDOMListenerParams {
 
 export class DOMListener {
     view: View<any>;
-    private eventType: keyof HTMLElementEventMap;
+    private realEventType: keyof HTMLElementEventMap;
     private selector: string;
     private handlerArgs: ( string[] | (new (...args: any[]) => Model))[];
     private handler: (...args: any[]) => void;
     private domHandler!: (...args: any[]) => void;
 
     constructor(params: IDOMListenerParams) {
-        this.eventType = params.eventType;
+        this.realEventType = fixFocusAndBlur(params.eventType);
         this.selector = params.selector;
         this.handlerArgs = params.handlerArgs;
         this.handler = params.handler;
@@ -34,11 +34,11 @@ export class DOMListener {
         this.domHandler = (event: Event) => {
             this.onDOMEvent(event);
         };
-        document.addEventListener(this.eventType, this.domHandler);
+        document.addEventListener(this.realEventType, this.domHandler);
     }
 
     destroy() {
-        document.removeEventListener(this.eventType, this.domHandler);
+        document.removeEventListener(this.realEventType, this.domHandler);
         delete this.view;
         delete this.handler;
         delete this.domHandler;
@@ -51,6 +51,7 @@ export class DOMListener {
             this.handler(...args);
         }
     }
+
     private isValidEvent(event: Event): boolean {
         const componentEl = ReactDOM.findDOMNode(this.view) as any;
 
@@ -81,4 +82,18 @@ export class DOMListener {
 
         return args;
     }
+}
+
+
+// blur and focus do not bubbling
+function fixFocusAndBlur(eventType: keyof HTMLElementEventMap): keyof HTMLElementEventMap {
+    if ( eventType === "blur" ) {
+        return "focusout";
+    }
+
+    if ( eventType === "focus" ) {
+        return "focusin";
+    }
+
+    return eventType;
 }
