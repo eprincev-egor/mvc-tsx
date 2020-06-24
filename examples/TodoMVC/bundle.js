@@ -780,6 +780,10 @@ class EditNameController extends mvc_tsx_1.Controller {
             this.onPressEscape();
         }
     }
+    onBlurEditInput() {
+        const todo = this.model;
+        todo.disableEdit();
+    }
     onPressEnter(inputValue) {
         const todo = this.model;
         todo.disableEdit();
@@ -805,6 +809,12 @@ __decorate([
     __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", void 0)
 ], EditNameController.prototype, "onKeyupEditInput", null);
+__decorate([
+    mvc_tsx_1.on("blur", ".EditNameInput"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], EditNameController.prototype, "onBlurEditInput", null);
 exports.EditNameController = EditNameController;
 
 

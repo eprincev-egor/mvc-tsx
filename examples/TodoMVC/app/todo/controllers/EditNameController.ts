@@ -23,6 +23,12 @@ export class EditNameController extends Controller<TodoModel> {
         }
     }
 
+    @on("blur", ".EditNameInput")
+    onBlurEditInput() {
+        const todo = this.model;
+        todo.disableEdit();
+    }
+
     private onPressEnter(inputValue: string) {
         const todo = this.model;
         todo.disableEdit();
