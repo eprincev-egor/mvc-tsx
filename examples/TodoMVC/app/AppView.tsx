@@ -8,6 +8,7 @@ import { ToggleAllTodosStatusController } from "./controllers/ToggleAllTodosStat
 import { LocalStorageController } from "./controllers/LocalStorageController";
 import { ActiveCountController } from "./controllers/ActiveCountController";
 import { ClearCompletedController } from "./controllers/ClearCompletedController";
+import { RouterController } from "./controllers/RouterController";
 import "./App.css";
 
 export class AppView extends View<AppModel> {
@@ -19,7 +20,8 @@ export class AppView extends View<AppModel> {
             ToggleAllTodosStatusController,
             LocalStorageController,
             ActiveCountController,
-            ClearCompletedController
+            ClearCompletedController,
+            RouterController
         ];
     }
     
@@ -35,13 +37,22 @@ export class AppView extends View<AppModel> {
 
                     <ul className="filters">
                         <li>
-                            <a className="selected" href="#/">All</a>
+                            <a 
+                                className={app.statusFilter === "all" ? "selected" : ""} 
+                                href="#/"
+                            >All</a>
                         </li>
                         <li>
-                            <a href="#/active">Active</a>
+                            <a 
+                                className={app.statusFilter === "active" ? "selected" : ""} 
+                                href="#/active"
+                            >Active</a>
                         </li>
                         <li>
-                            <a href="#/completed">Completed</a>
+                            <a 
+                                className={app.statusFilter === "completed" ? "selected" : ""} 
+                                href="#/completed"
+                            >Completed</a>
                         </li>
                     </ul>
 
@@ -78,7 +89,7 @@ export class AppView extends View<AppModel> {
                     <label htmlFor="toggle-all">Mark all as complete</label>
 
                     <ul className="todo-list">
-                        {app.todos.map(item =>
+                        {app.getFilteredTodos().map(item =>
                             <TodoView model={item} key={item.id}/>
                         )}
                     </ul>

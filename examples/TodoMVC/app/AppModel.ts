@@ -2,7 +2,7 @@ import { Model } from "mvc-tsx";
 import { TodoStatus, TodoModel } from "./todo/TodoModel";
 
 export class AppModel extends Model {
-    filterStatus: TodoStatus | null = null;
+    statusFilter: "all" | "active" | "completed" = "all";
     todos: TodoModel[] = [];
     activeTodosCount: number = 0;
 
@@ -39,6 +39,34 @@ export class AppModel extends Model {
 
             app.emit("removeTodo", todo);
         }
+    }
+
+    setStatusFilter(newStatusFilter: this["statusFilter"]) {
+        const app: AppModel = this;
+
+        app.set({
+            statusFilter: newStatusFilter
+        });
+    }
+
+    getFilteredTodos() {
+        const app: AppModel = this;
+        const filteredTodos = app.todos.filter(todo =>
+            this.filterTodo(todo)
+        );
+
+        return filteredTodos;
+    }
+
+    private filterTodo(todo: TodoModel) {
+        if ( this.statusFilter === "active" ) {
+            return todo.isActive();
+        }
+        if ( this.statusFilter === "completed" ) {
+            return todo.isCompleted();
+        }
+        
+        return true;
     }
 
     setAllTodosStatus(newStatus: TodoStatus) {

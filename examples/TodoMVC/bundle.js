@@ -123,7 +123,7 @@ const TodoModel_1 = __webpack_require__("./examples/TodoMVC/app/todo/TodoModel.t
 class AppModel extends mvc_tsx_1.Model {
     constructor() {
         super(...arguments);
-        this.filterStatus = null;
+        this.statusFilter = "all";
         this.todos = [];
         this.activeTodosCount = 0;
     }
@@ -150,6 +150,26 @@ class AppModel extends mvc_tsx_1.Model {
             app.recalculateActiveTodosCount();
             app.emit("removeTodo", todo);
         }
+    }
+    setStatusFilter(newStatusFilter) {
+        const app = this;
+        app.set({
+            statusFilter: newStatusFilter
+        });
+    }
+    getFilteredTodos() {
+        const app = this;
+        const filteredTodos = app.todos.filter(todo => this.filterTodo(todo));
+        return filteredTodos;
+    }
+    filterTodo(todo) {
+        if (this.statusFilter === "active") {
+            return todo.isActive();
+        }
+        if (this.statusFilter === "completed") {
+            return todo.isCompleted();
+        }
+        return true;
     }
     setAllTodosStatus(newStatus) {
         const app = this;
@@ -219,6 +239,7 @@ const ToggleAllTodosStatusController_1 = __webpack_require__("./examples/TodoMVC
 const LocalStorageController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/LocalStorageController.ts");
 const ActiveCountController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ActiveCountController.ts");
 const ClearCompletedController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/ClearCompletedController.ts");
+const RouterController_1 = __webpack_require__("./examples/TodoMVC/app/controllers/RouterController.ts");
 __webpack_require__("./examples/TodoMVC/app/App.css");
 class AppView extends mvc_tsx_1.View {
     controllers() {
@@ -228,7 +249,8 @@ class AppView extends mvc_tsx_1.View {
             ToggleAllTodosStatusController_1.ToggleAllTodosStatusController,
             LocalStorageController_1.LocalStorageController,
             ActiveCountController_1.ActiveCountController,
-            ClearCompletedController_1.ClearCompletedController
+            ClearCompletedController_1.ClearCompletedController,
+            RouterController_1.RouterController
         ];
     }
     template(app) {
@@ -242,11 +264,11 @@ class AppView extends mvc_tsx_1.View {
                     " left"),
                 react_1.default.createElement("ul", { className: "filters" },
                     react_1.default.createElement("li", null,
-                        react_1.default.createElement("a", { className: "selected", href: "#/" }, "All")),
+                        react_1.default.createElement("a", { className: app.statusFilter === "all" ? "selected" : "", href: "#/" }, "All")),
                     react_1.default.createElement("li", null,
-                        react_1.default.createElement("a", { href: "#/active" }, "Active")),
+                        react_1.default.createElement("a", { className: app.statusFilter === "active" ? "selected" : "", href: "#/active" }, "Active")),
                     react_1.default.createElement("li", null,
-                        react_1.default.createElement("a", { href: "#/completed" }, "Completed"))),
+                        react_1.default.createElement("a", { className: app.statusFilter === "completed" ? "selected" : "", href: "#/completed" }, "Completed"))),
                 app.hasCompletedTodo() ? (react_1.default.createElement("span", { className: "todo-clear" },
                     react_1.default.createElement("button", { className: "clear-completed ClearCompleted" }, "Clear completed"))) : null));
         }
@@ -257,7 +279,7 @@ class AppView extends mvc_tsx_1.View {
             react_1.default.createElement("section", { className: "main" },
                 react_1.default.createElement("input", { className: "toggle-all ToggleAllStatus", id: "toggle-all", type: "checkbox", checked: app.isAllCompleted(), onChange: (e) => 1 }),
                 react_1.default.createElement("label", { htmlFor: "toggle-all" }, "Mark all as complete"),
-                react_1.default.createElement("ul", { className: "todo-list" }, app.todos.map(item => react_1.default.createElement(TodoView_1.TodoView, { model: item, key: item.id })))),
+                react_1.default.createElement("ul", { className: "todo-list" }, app.getFilteredTodos().map(item => react_1.default.createElement(TodoView_1.TodoView, { model: item, key: item.id })))),
             footer));
     }
     getItemsWord() {
@@ -545,6 +567,42 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], RemoveTodoController.prototype, "onClickRemove", null);
 exports.RemoveTodoController = RemoveTodoController;
+
+
+/***/ }),
+
+/***/ "./examples/TodoMVC/app/controllers/RouterController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RouterController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+class RouterController extends mvc_tsx_1.Controller {
+    constructor(app) {
+        super(app);
+        this.onChangeHash = this.onChangeHash.bind(this);
+        window.addEventListener("load", this.onChangeHash);
+        window.addEventListener("hashchange", this.onChangeHash);
+    }
+    onChangeHash() {
+        const app = this.model;
+        const statusFilter = getStatusFilterFromLocationHash();
+        app.setStatusFilter(statusFilter);
+    }
+}
+exports.RouterController = RouterController;
+function getStatusFilterFromLocationHash() {
+    const hash = location.hash;
+    if (hash === "#/completed") {
+        return "completed";
+    }
+    if (hash === "#/active") {
+        return "active";
+    }
+    return "all";
+}
 
 
 /***/ }),
