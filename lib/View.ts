@@ -30,7 +30,7 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
     }
 
     private createControllers() {
-        const Constructors = this.controllers();
+        const Controllers = this.controllers(this.model);
         this.controllersInstances = [];
 
         const originalEmit = this.model.emit;
@@ -40,13 +40,23 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
             throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
         };
 
-        for (const Constructor of Constructors) {
-            CurrentConstructor = Constructor;
+        for (const ConstructorOrInstance of Controllers) {
+            if ( typeof ConstructorOrInstance === "function" ) {
+                CurrentConstructor = ConstructorOrInstance;
 
-            const controller = new Constructor(this.model);
-            domEvents.addController(controller, this);
+                const controller = new CurrentConstructor(this.model);
+                domEvents.addController(controller, this);
             
-            this.controllersInstances.push(controller);
+                this.controllersInstances.push(controller);
+            }
+            else {
+                const controller = ConstructorOrInstance;
+                CurrentConstructor = controller.constructor;
+                
+                domEvents.addController(controller, this);
+
+                this.controllersInstances.push(controller);
+            }
         }
 
         this.model.emit = originalEmit;
@@ -96,7 +106,10 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
      * Register controllers.  
      * Should be function who returns list of Controllers constructors
      */
-    controllers(): (new (model: TModel) => Controller<TModel>)[] {
+    controllers(model: TModel): (
+        (new (model: TModel) => Controller<TModel>) |
+        Controller<TModel>
+    )[] {
         return [];
     }
 }

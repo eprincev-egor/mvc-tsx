@@ -12,7 +12,9 @@ export interface IHandlerArgs {
 export interface IListenerMeta {
     eventType: string;
     selector: string | TModelConstructor;
-    methodName: string;
+    methodName?: string;
+    handler?: (...args: any[]) => void;
+    handlerArgs?: HandlerArg[]; 
 }
 
 export type HandlerArg = string[] | TModelConstructor;
@@ -26,8 +28,8 @@ export interface IListener {
 
 /**
  * Attach handler to View DOM events like are click, or model events.
- * @param eventType any DOM Event type
- * @param selector "model" or simple class selector like are: ".my-class". 
+ * @param eventTypeOrModel any DOM Event type or Model constructor
+ * @param selectorOrModelEventType selector like are: ".my-class" or model eventType  
  * Selectors like are ".a .b .c" does not supported.
  */
 export function on(
@@ -130,12 +132,26 @@ export function getListeners(controller: Controller<any>) {
     const listenersMeta = (proto._listenersMeta || [] )as IListenerMeta[];
     const listeners: IListener[] = [];
 
+    listenersMeta.push(
+        ...(controller as any).dynamicListeners
+    );
+
     for (const listenerMeta of listenersMeta) {
-        const handler = (controller as any)[ listenerMeta.methodName ].bind(controller);
-        const handlerArgs = findHandlerArguments(
-            controller, 
-            listenerMeta.methodName
-        );
+        let handler: (...args: any[]) => void;
+        let handlerArgs: HandlerArg[] = [];
+
+        if ( listenerMeta.methodName ) {
+            handler = (controller as any)[ listenerMeta.methodName ].bind(controller);
+
+            handlerArgs = findHandlerArguments(
+                controller, 
+                listenerMeta.methodName
+            );    
+        }
+        else {
+            handler = listenerMeta.handler as (...args: any[]) => void;
+            handlerArgs = listenerMeta.handlerArgs as HandlerArg[];
+        }
 
         const listener: IListener = {
             eventType: listenerMeta.eventType,
@@ -150,7 +166,7 @@ export function getListeners(controller: Controller<any>) {
 }
 
 
-function findHandlerArguments(controller: Controller<any>, methodName: string): HandlerArg[] {
+export function findHandlerArguments(controller: Controller<any>, methodName: string): HandlerArg[] {
     const proto = controller.constructor.prototype;
 
     const handlersArguments: IHandlerArgs[] = proto._handlersArguments || [];

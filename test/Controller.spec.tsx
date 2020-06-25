@@ -900,5 +900,128 @@ describe("Controller", () => {
         assert.strictEqual(hasCall, true);
     });
 
+    it("provide options to controller", () => {
+        interface IOptions<TModel extends Model> {
+            key: keyof TModel;
+            selector: string;
+        }
+        interface IInput {
+            value: string;
+            classList: {
+                add(className: string): void;
+                remove(className: string): void;
+            }
+        }
+
+        class UniversalValidateController<TModel extends Model> 
+        extends Controller<TModel> {
+            private options: IOptions<TModel>;
+
+            constructor(model: TModel, options: IOptions<TModel>) {
+                super(model);
+                this.options = options;
+
+                this.on("change", options.selector, this.onChangeInput);
+            }
+
+            onChangeInput(
+                @arg("target") input: IInput
+            ) {
+                const value = input.value;
+                const isValid = value && value.trim();
+                
+                if ( isValid ) {
+                    input.classList.remove("invalid");
+
+                    this.model.set({
+                        [this.options.key]: input.value.trim()
+                    });
+                }
+                else {
+                    input.classList.add("invalid");
+
+                    this.model.set({
+                        [this.options.key]: undefined
+                    });
+                }
+            }
+        }
+
+        class FirstModel extends Model {
+            name?: string;
+        }
+        class SecondModel extends Model {
+            email?: string;
+        }
+
+        class FirstView extends View<FirstModel> {
+            controllers(model: FirstModel) {
+                return [
+                    new UniversalValidateController(model, {
+                        key: "name",
+                        selector: ".nameInput"
+                    })
+                ];
+            }
+
+            template(model: FirstModel) {
+                return <div className="First">
+                    <input className="nameInput"/>
+                </div>;
+            }
+        }
+        
+        class SecondView extends View<SecondModel> {
+            controllers(model: SecondModel) {
+                return [
+                    new UniversalValidateController(model, {
+                        key: "email",
+                        selector: ".emailInput"
+                    })
+                ];
+            }
+
+            template() {
+                return <div className="Second">
+                    <input className="emailInput"/>
+                </div>;
+            }
+        }
+
+        let inputEl: any;
+        let changeEvent: any;
+
+
+        // test FirstView and FirstModel
+        const firstModel = new FirstModel();
+        act(() => {
+            render(<FirstView model={firstModel}/>, container);
+        });
+
+        inputEl = document.querySelector(".nameInput") as HTMLInputElement;
+
+        changeEvent = new window.Event("change", {bubbles: true});
+        inputEl.value = "hello";
+        inputEl.dispatchEvent(changeEvent);
+
+        assert.strictEqual(firstModel.name, "hello");
+
+
+        // test SecondView and SecondModel
+        const secondModel = new SecondModel();
+        act(() => {
+            render(<SecondView model={secondModel}/>, container);
+        });
+
+        inputEl = document.querySelector(".emailInput") as HTMLInputElement;
+
+        changeEvent = new window.Event("change", {bubbles: true});
+        inputEl.value = "   ";
+        inputEl.dispatchEvent(changeEvent);
+
+        assert.strictEqual(secondModel.email, undefined);
+
+    });
+
 
 });

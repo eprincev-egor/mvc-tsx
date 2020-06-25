@@ -1,9 +1,10 @@
 import { Model } from "./Model";
-import { getListeners, isModelListener } from "./ControllerMeta";
+import { getListeners, isModelListener, findHandlerArguments } from "./ControllerMeta";
 
 export abstract class Controller<TModel extends Model> {
     protected model: Readonly<TModel>;
     private modelListeners: any[] = [];
+    private dynamicListeners: any[] = [];
 
     constructor(model: TModel) {
         this.model = model;
@@ -28,6 +29,28 @@ export abstract class Controller<TModel extends Model> {
             });
             this.model.on(eventType, handler);
         }
+    }
+
+    /**
+     * Attach handler to View DOM events like are click, or model events.
+     * @param eventType any DOM Event type
+     * @param selector "model" or simple class selector like are: ".my-class". 
+     * Selectors like are ".a .b .c" does not supported.
+     */
+    on(
+        eventType: keyof HTMLElementEventMap,
+        selector: string,
+        handler: (...args: any[]) => void
+    ) {
+        const handlerArgs = findHandlerArguments(this, handler.name);
+        handler = handler.bind(this);
+        
+        this.dynamicListeners.push({
+            eventType,
+            selector,
+            handler,
+            handlerArgs
+        });
     }
 
     /**

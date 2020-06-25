@@ -29075,6 +29075,7 @@ const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
 class Controller {
     constructor(model) {
         this.modelListeners = [];
+        this.dynamicListeners = [];
         this.model = model;
         this.initModelEvents();
     }
@@ -29092,6 +29093,22 @@ class Controller {
             });
             this.model.on(eventType, handler);
         }
+    }
+    /**
+     * Attach handler to View DOM events like are click, or model events.
+     * @param eventType any DOM Event type
+     * @param selector "model" or simple class selector like are: ".my-class".
+     * Selectors like are ".a .b .c" does not supported.
+     */
+    on(eventType, selector, handler) {
+        const handlerArgs = ControllerMeta_1.findHandlerArguments(this, handler.name);
+        handler = handler.bind(this);
+        this.dynamicListeners.push({
+            eventType,
+            selector,
+            handler,
+            handlerArgs
+        });
     }
     /**
      * Destroy controller and clear memory.
@@ -29124,11 +29141,11 @@ exports.Controller = Controller;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDomListener = exports.isModelListener = exports.getListeners = exports.arg = exports.on = void 0;
+exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.arg = exports.on = void 0;
 /**
  * Attach handler to View DOM events like are click, or model events.
- * @param eventType any DOM Event type
- * @param selector "model" or simple class selector like are: ".my-class".
+ * @param eventTypeOrModel any DOM Event type or Model constructor
+ * @param selectorOrModelEventType selector like are: ".my-class" or model eventType
  * Selectors like are ".a .b .c" does not supported.
  */
 function on(eventTypeOrModel, selectorOrModelEventType) {
@@ -29199,9 +29216,18 @@ function getListeners(controller) {
     const proto = controller.constructor.prototype;
     const listenersMeta = (proto._listenersMeta || []);
     const listeners = [];
+    listenersMeta.push(...controller.dynamicListeners);
     for (const listenerMeta of listenersMeta) {
-        const handler = controller[listenerMeta.methodName].bind(controller);
-        const handlerArgs = findHandlerArguments(controller, listenerMeta.methodName);
+        let handler;
+        let handlerArgs = [];
+        if (listenerMeta.methodName) {
+            handler = controller[listenerMeta.methodName].bind(controller);
+            handlerArgs = findHandlerArguments(controller, listenerMeta.methodName);
+        }
+        else {
+            handler = listenerMeta.handler;
+            handlerArgs = listenerMeta.handlerArgs;
+        }
         const listener = {
             eventType: listenerMeta.eventType,
             selector: listenerMeta.selector,
@@ -29222,6 +29248,7 @@ function findHandlerArguments(controller, methodName) {
         .map(someArgs => someArgs.eventPropertyPath);
     return handlerArgs;
 }
+exports.findHandlerArguments = findHandlerArguments;
 function isModelListener(listener) {
     return (typeof listener.selector !== "string");
 }
@@ -29472,18 +29499,26 @@ class View extends React.Component {
         this.listenModelChanges();
     }
     createControllers() {
-        const Constructors = this.controllers();
+        const Controllers = this.controllers(this.model);
         this.controllersInstances = [];
         const originalEmit = this.model.emit;
         let CurrentConstructor;
         this.model.emit = (eventType) => {
             throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
         };
-        for (const Constructor of Constructors) {
-            CurrentConstructor = Constructor;
-            const controller = new Constructor(this.model);
-            domEvents.addController(controller, this);
-            this.controllersInstances.push(controller);
+        for (const ConstructorOrInstance of Controllers) {
+            if (typeof ConstructorOrInstance === "function") {
+                CurrentConstructor = ConstructorOrInstance;
+                const controller = new CurrentConstructor(this.model);
+                domEvents.addController(controller, this);
+                this.controllersInstances.push(controller);
+            }
+            else {
+                const controller = ConstructorOrInstance;
+                CurrentConstructor = controller.constructor;
+                domEvents.addController(controller, this);
+                this.controllersInstances.push(controller);
+            }
         }
         this.model.emit = originalEmit;
     }
@@ -29521,7 +29556,7 @@ class View extends React.Component {
      * Register controllers.
      * Should be function who returns list of Controllers constructors
      */
-    controllers() {
+    controllers(model) {
         return [];
     }
 }
