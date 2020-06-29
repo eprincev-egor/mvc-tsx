@@ -1,10 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Model } from "./Model";
-import { Controller } from "./Controller";
-import { DOMEvents } from "./DOMEvents";
-
-const domEvents = new DOMEvents();
+import { mvcEvents } from "./mvcEvents";
 
 /**
  * Base View layer
@@ -12,8 +9,11 @@ const domEvents = new DOMEvents();
  */
 export abstract class View<TModel extends Model> extends React.Component<{model: TModel}> {
     model!: TModel;
-    protected controllersInstances!: Controller<TModel>[];
-    
+
+    static ui: {
+        [elementName: string]: string
+    } = {};
+
     /**
      * HTML Template.
      * Should be function who returns React template
@@ -25,41 +25,12 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         super(props);
 
         this.model = props.model;
-        this.createControllers();
         this.listenModelChanges();
-    }
 
-    private createControllers() {
-        const Controllers = this.controllers(this.model);
-        this.controllersInstances = [];
-
-        const originalEmit = this.model.emit;
-        let CurrentConstructor: any;
-
-        this.model.emit = (eventType: string) => {
-            throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
-        };
-
-        for (const ConstructorOrInstance of Controllers) {
-            if ( typeof ConstructorOrInstance === "function" ) {
-                CurrentConstructor = ConstructorOrInstance;
-
-                const controller = new CurrentConstructor(this.model);
-                domEvents.addController(controller, this);
-            
-                this.controllersInstances.push(controller);
-            }
-            else {
-                const controller = ConstructorOrInstance;
-                CurrentConstructor = controller.constructor;
-                
-                domEvents.addController(controller, this);
-
-                this.controllersInstances.push(controller);
-            }
-        }
-
-        this.model.emit = originalEmit;
+        mvcEvents.emit("initView", {
+            view: this,
+            model: this.model
+        });
     }
 
     private listenModelChanges() {
@@ -82,16 +53,13 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
 
         this.onDestroy();
 
+        mvcEvents.emit("destroyView", {
+            view: this,
+            model: this.model
+        });
+
         const rootEl = ReactDOM.findDOMNode(this) as any;
         delete rootEl._model;
-
-        domEvents.destroyListeners(this);
-        
-        for (const controller of this.controllersInstances) {
-            controller.destroy();
-        }
-        
-        this.controllersInstances = [];
     }
 
     /**
@@ -100,16 +68,5 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
      */
     onDestroy() {
         // redefine me
-    }
-
-    /**
-     * Register controllers.  
-     * Should be function who returns list of Controllers constructors
-     */
-    controllers(model: TModel): (
-        (new (model: TModel) => Controller<TModel>) |
-        Controller<TModel>
-    )[] {
-        return [];
     }
 }

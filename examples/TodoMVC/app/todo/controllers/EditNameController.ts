@@ -1,16 +1,18 @@
-import { Controller, on, arg } from "mvc-tsx";
+import { Controller, on, arg, forView } from "mvc-tsx";
 import { TodoModel } from "../TodoModel";
+import { TodoView } from "../TodoView";
 import { ENTER_KEY_CODE, ESCAPE_KEY_CODE } from "../../keyCodes";
 
+@forView(TodoView)
 export class EditNameController extends Controller<TodoModel> {
 
-    @on("dblclick", ".StartEdit")
+    @on("dblclick", TodoView.ui.startEdit)
     onStartEdit(@arg("target") target: HTMLDivElement) {
         const todo = this.model;
         todo.enableEdit();
     }
 
-    @on("keyup", ".EditNameInput")
+    @on("keyup", TodoView.ui.nameInput)
     onKeyupEditInput(
         @arg("keyCode") keyCode: number,
         @arg("target", "value") inputValue: string
@@ -23,7 +25,7 @@ export class EditNameController extends Controller<TodoModel> {
         }
     }
 
-    @on("blur", ".EditNameInput")
+    @on("blur", TodoView.ui.nameInput)
     onBlurEditInput() {
         const todo = this.model;
         todo.disableEdit();

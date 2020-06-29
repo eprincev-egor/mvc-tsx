@@ -91,10 +91,21 @@
 
 "use strict";
 
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClockController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-class ClockController extends mvc_tsx_1.Controller {
+const ClockModel_1 = __webpack_require__("./examples/clock/ClockModel.ts");
+const ClockView_1 = __webpack_require__("./examples/clock/ClockView.tsx");
+let ClockController = class ClockController extends mvc_tsx_1.Controller {
     constructor(model) {
         super(model);
         this.createInterval();
@@ -109,7 +120,11 @@ class ClockController extends mvc_tsx_1.Controller {
             time: new Date()
         });
     }
-}
+};
+ClockController = __decorate([
+    mvc_tsx_1.forView(ClockView_1.ClockView),
+    __metadata("design:paramtypes", [ClockModel_1.ClockModel])
+], ClockController);
 exports.ClockController = ClockController;
 
 
@@ -146,13 +161,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClockView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-const ClockController_1 = __webpack_require__("./examples/clock/ClockController.ts");
 class ClockView extends mvc_tsx_1.View {
-    controllers() {
-        return [
-            ClockController_1.ClockController
-        ];
-    }
     template(model) {
         return react_1.default.createElement("div", { className: "Clock" }, model.time.toTimeString());
     }
@@ -191,6 +200,8 @@ const React = __importStar(__webpack_require__("react"));
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
 const ClockView_1 = __webpack_require__("./examples/clock/ClockView.tsx");
 const ClockModel_1 = __webpack_require__("./examples/clock/ClockModel.ts");
+// need include to bundle
+__webpack_require__("./examples/clock/ClockController.ts");
 const clockModel = new ClockModel_1.ClockModel();
 ReactDOM.render(React.createElement(ClockView_1.ClockView, { model: clockModel }), document.getElementById("root"));
 

@@ -1,8 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { products } from "./products";
-import { RootView } from "./root/RootView";
-import { RootModel } from "./root/RootModel";
+import { RootView, RootModel } from "./root";
 
 const rootModel = new RootModel(products);
 

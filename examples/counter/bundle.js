@@ -103,19 +103,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CounterController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-class CounterController extends mvc_tsx_1.Controller {
+const CounterView_1 = __webpack_require__("./examples/counter/CounterView.tsx");
+let CounterController = class CounterController extends mvc_tsx_1.Controller {
     onClickButton() {
         this.model.set({
             counter: this.model.counter + 1
         });
     }
-}
+};
 __decorate([
-    mvc_tsx_1.on("click", ".Counter--button"),
+    mvc_tsx_1.on("click", CounterView_1.CounterView.ui.raiseButton),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], CounterController.prototype, "onClickButton", null);
+CounterController = __decorate([
+    mvc_tsx_1.forView(CounterView_1.CounterView)
+], CounterController);
 exports.CounterController = CounterController;
 
 
@@ -152,13 +156,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CounterView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-const CounterController_1 = __webpack_require__("./examples/counter/CounterController.ts");
 class CounterView extends mvc_tsx_1.View {
-    controllers() {
-        return [
-            CounterController_1.CounterController
-        ];
-    }
     template(model) {
         return react_1.default.createElement("div", { className: "Counter" },
             react_1.default.createElement("div", { className: "Counter--value" }, model.counter),
@@ -166,6 +164,9 @@ class CounterView extends mvc_tsx_1.View {
     }
 }
 exports.CounterView = CounterView;
+CounterView.ui = {
+    raiseButton: ".Counter--button"
+};
 
 
 /***/ }),
@@ -199,6 +200,8 @@ const React = __importStar(__webpack_require__("react"));
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
 const CounterView_1 = __webpack_require__("./examples/counter/CounterView.tsx");
 const CounterModel_1 = __webpack_require__("./examples/counter/CounterModel.ts");
+// need include to bundle
+__webpack_require__("./examples/counter/CounterController.ts");
 const counterModel = new CounterModel_1.CounterModel();
 ReactDOM.render(React.createElement(CounterView_1.CounterView, { model: counterModel }), document.getElementById("root"));
 

@@ -2,28 +2,15 @@ import React from "react";
 import { View } from "mvc-tsx";
 import { AppModel } from "./AppModel";
 import { TodoView } from "./todo/TodoView";
-import { AddTodoController } from "./controllers/AddTodoController";
-import { RemoveTodoController } from "./controllers/RemoveTodoController";
-import { ToggleAllTodosStatusController } from "./controllers/ToggleAllTodosStatusController";
-import { LocalStorageController } from "./controllers/LocalStorageController";
-import { ActiveCountController } from "./controllers/ActiveCountController";
-import { ClearCompletedController } from "./controllers/ClearCompletedController";
-import { RouterController } from "./controllers/RouterController";
 import "./App.css";
 
 export class AppView extends View<AppModel> {
 
-    controllers() {
-        return [
-            AddTodoController,
-            RemoveTodoController,
-            ToggleAllTodosStatusController,
-            LocalStorageController,
-            ActiveCountController,
-            ClearCompletedController,
-            RouterController
-        ];
-    }
+    static ui = {
+        addTodo: ".AddTodo",
+        clearCompleted: ".ClearCompleted",
+        toggleAllStatus: ".ToggleAllStatus"
+    };
     
     template(app: AppModel) {
         let footer: JSX.Element | undefined;

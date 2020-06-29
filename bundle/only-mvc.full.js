@@ -103,7 +103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Controller = void 0;
-const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
+const Meta_1 = __webpack_require__("./lib/Meta.ts");
 class Controller {
     constructor(model) {
         this.modelListeners = [];
@@ -112,8 +112,8 @@ class Controller {
         this.initModelEvents();
     }
     initModelEvents() {
-        const listeners = ControllerMeta_1.getListeners(this);
-        const modelListeners = listeners.filter(listener => ControllerMeta_1.isModelListener(listener));
+        const listeners = Meta_1.getListeners(this);
+        const modelListeners = listeners.filter(listener => Meta_1.isModelListener(listener));
         for (const listener of modelListeners) {
             const eventType = listener.eventType;
             const handler = (...args) => {
@@ -133,7 +133,7 @@ class Controller {
      * Selectors like are ".a .b .c" does not supported.
      */
     on(eventType, selector, handler) {
-        const handlerArgs = ControllerMeta_1.findHandlerArguments(this, handler.name);
+        const handlerArgs = Meta_1.findHandlerArguments(this, handler.name);
         handler = handler.bind(this);
         this.dynamicListeners.push({
             eventType,
@@ -163,179 +163,6 @@ class Controller {
     }
 }
 exports.Controller = Controller;
-
-
-/***/ }),
-
-/***/ "./lib/ControllerMeta.ts":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.arg = exports.on = void 0;
-/**
- * Attach handler to View DOM events like are click, or model events.
- * @param eventTypeOrModel any DOM Event type or Model constructor
- * @param selectorOrModelEventType selector like are: ".my-class" or model eventType
- * Selectors like are ".a .b .c" does not supported.
- */
-function on(eventTypeOrModel, selectorOrModelEventType) {
-    let eventType;
-    let selector;
-    if (typeof eventTypeOrModel === "string") {
-        eventType = eventTypeOrModel;
-        selector = selectorOrModelEventType;
-        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-        if (!selectorIsJustClassName) {
-            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
-        }
-    }
-    else {
-        eventType = selectorOrModelEventType;
-        selector = eventTypeOrModel;
-    }
-    return (target, methodName, descriptor) => {
-        if (!target._listenersMeta) {
-            target._listenersMeta = [];
-        }
-        const meta = {
-            eventType,
-            selector,
-            methodName
-        };
-        target._listenersMeta.push(meta);
-    };
-}
-exports.on = on;
-/**
- * Get some value from event
- * @param firstKey keyof dom event object
- * @param secondKey keyof Event[firstKey], next step in property path.
- * @param otherPropertyPath other keys
- */
-function arg(firstKey, secondKey, ...otherPropertyPath) {
-    return (target, methodName, argumentIndex) => {
-        if (!target._handlersArguments) {
-            target._handlersArguments = [];
-        }
-        const handlerArgs = {
-            methodName,
-            argumentIndex,
-            eventPropertyPath: []
-        };
-        if (typeof firstKey === "string") {
-            const propertyPath = [
-                firstKey
-            ];
-            if (secondKey) {
-                propertyPath.push(secondKey);
-            }
-            if (otherPropertyPath.length) {
-                propertyPath.push(...otherPropertyPath);
-            }
-            handlerArgs.eventPropertyPath = propertyPath;
-        }
-        else {
-            const ModelConstructor = firstKey;
-            handlerArgs.eventPropertyPath = ModelConstructor;
-        }
-        target._handlersArguments.push(handlerArgs);
-    };
-}
-exports.arg = arg;
-function getListeners(controller) {
-    const proto = controller.constructor.prototype;
-    const listenersMeta = (proto._listenersMeta || []);
-    const listeners = [];
-    listenersMeta.push(...controller.dynamicListeners);
-    for (const listenerMeta of listenersMeta) {
-        let handler;
-        let handlerArgs = [];
-        if (listenerMeta.methodName) {
-            handler = controller[listenerMeta.methodName].bind(controller);
-            handlerArgs = findHandlerArguments(controller, listenerMeta.methodName);
-        }
-        else {
-            handler = listenerMeta.handler;
-            handlerArgs = listenerMeta.handlerArgs;
-        }
-        const listener = {
-            eventType: listenerMeta.eventType,
-            selector: listenerMeta.selector,
-            handlerArgs,
-            handler
-        };
-        listeners.push(listener);
-    }
-    return listeners;
-}
-exports.getListeners = getListeners;
-function findHandlerArguments(controller, methodName) {
-    const proto = controller.constructor.prototype;
-    const handlersArguments = proto._handlersArguments || [];
-    const handlerArgs = handlersArguments
-        .filter(someArgs => someArgs.methodName === methodName)
-        .sort((a, b) => a.argumentIndex - b.argumentIndex)
-        .map(someArgs => someArgs.eventPropertyPath);
-    return handlerArgs;
-}
-exports.findHandlerArguments = findHandlerArguments;
-function isModelListener(listener) {
-    return (typeof listener.selector !== "string");
-}
-exports.isModelListener = isModelListener;
-function isDomListener(listener) {
-    return !isModelListener(listener);
-}
-exports.isDomListener = isDomListener;
-
-
-/***/ }),
-
-/***/ "./lib/DOMEvents.ts":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DOMEvents = void 0;
-const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
-const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
-class DOMEvents {
-    constructor() {
-        this.listeners = [];
-    }
-    addController(controller, view) {
-        const listeners = ControllerMeta_1.getListeners(controller);
-        for (const listener of listeners) {
-            this.addListener(listener, view);
-        }
-    }
-    destroyListeners(view) {
-        const viewListeners = this.listeners.filter(listener => listener.view === view);
-        for (const listener of viewListeners) {
-            listener.destroy();
-            const listenerIndex = this.listeners.indexOf(listener);
-            this.listeners.splice(listenerIndex, 1);
-        }
-    }
-    addListener(listener, view) {
-        if (!ControllerMeta_1.isDomListener(listener)) {
-            return;
-        }
-        const domListener = new DOMListener_1.DOMListener({
-            eventType: listener.eventType,
-            selector: listener.selector,
-            handlerArgs: listener.handlerArgs,
-            handler: listener.handler,
-            view
-        });
-        domListener.listen();
-        this.listeners.push(domListener);
-    }
-}
-exports.DOMEvents = DOMEvents;
 
 
 /***/ }),
@@ -439,6 +266,222 @@ function fixFocusAndBlur(eventType) {
 
 /***/ }),
 
+/***/ "./lib/Meta.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.forView = exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.arg = exports.on = void 0;
+const mvcEvents_1 = __webpack_require__("./lib/mvcEvents.ts");
+const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
+;
+/**
+ * Attach handler to View DOM events like are click, or model events.
+ * ```js
+ * class MyController extends Controller<MyModel> {
+ *
+ *     // listen dom event
+ *     *@on("click", MyView.ui.button)
+ *     onClickButton() {
+ *         // some action
+ *     }
+ *
+ * }
+ * ```
+ * @param eventTypeOrModel any DOM Event type or Model constructor
+ * @param selectorOrModelEventType selector like are: ".my-class" or model eventType
+ * Selectors like are ".a .b .c" does not supported.
+ */
+function on(eventTypeOrModel, selectorOrModelEventType) {
+    let eventType;
+    let selector;
+    if (typeof eventTypeOrModel === "string") {
+        eventType = eventTypeOrModel;
+        selector = selectorOrModelEventType;
+        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+        if (!selectorIsJustClassName) {
+            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
+        }
+    }
+    else {
+        eventType = selectorOrModelEventType;
+        selector = eventTypeOrModel;
+    }
+    return (target, methodName, descriptor) => {
+        if (!target._listenersMeta) {
+            target._listenersMeta = [];
+        }
+        const meta = {
+            eventType,
+            selector,
+            methodName
+        };
+        target._listenersMeta.push(meta);
+    };
+}
+exports.on = on;
+/**
+ * Get some value from event object
+ * ```ts
+ * class MyController extends Controller<MyModel> {
+ *
+ *     *@on("change", MyView.ui.input)
+ *     onChangeInput(
+ *         // get changed input value:
+ *         // event.target.value
+ *         *@arg("target", "value") inputValue: string
+ *     ) {
+ *         // some action
+ *     }
+ *
+ * }
+ * ```
+ * @param firstKey keyof dom event object
+ * @param secondKey keyof Event[firstKey], next step in property path.
+ * @param otherPropertyPath other keys
+ */
+function arg(firstKey, secondKey, ...otherPropertyPath) {
+    return (target, methodName, argumentIndex) => {
+        if (!target._handlersArguments) {
+            target._handlersArguments = [];
+        }
+        const handlerArgs = {
+            methodName,
+            argumentIndex,
+            eventPropertyPath: []
+        };
+        if (typeof firstKey === "string") {
+            const propertyPath = [
+                firstKey
+            ];
+            if (secondKey) {
+                propertyPath.push(secondKey);
+            }
+            if (otherPropertyPath.length) {
+                propertyPath.push(...otherPropertyPath);
+            }
+            handlerArgs.eventPropertyPath = propertyPath;
+        }
+        else {
+            const ModelConstructor = firstKey;
+            handlerArgs.eventPropertyPath = ModelConstructor;
+        }
+        target._handlersArguments.push(handlerArgs);
+    };
+}
+exports.arg = arg;
+function getListeners(controller) {
+    const proto = controller.constructor.prototype;
+    const listenersMeta = (proto._listenersMeta || []);
+    const listeners = [];
+    listenersMeta.push(...controller.dynamicListeners);
+    for (const listenerMeta of listenersMeta) {
+        let handler;
+        let handlerArgs = [];
+        if (listenerMeta.methodName) {
+            handler = controller[listenerMeta.methodName].bind(controller);
+            handlerArgs = findHandlerArguments(controller, listenerMeta.methodName);
+        }
+        else {
+            handler = listenerMeta.handler;
+            handlerArgs = listenerMeta.handlerArgs;
+        }
+        const listener = {
+            eventType: listenerMeta.eventType,
+            selector: listenerMeta.selector,
+            handlerArgs,
+            handler
+        };
+        listeners.push(listener);
+    }
+    return listeners;
+}
+exports.getListeners = getListeners;
+function findHandlerArguments(controller, methodName) {
+    const proto = controller.constructor.prototype;
+    const handlersArguments = proto._handlersArguments || [];
+    const handlerArgs = handlersArguments
+        .filter(someArgs => someArgs.methodName === methodName)
+        .sort((a, b) => a.argumentIndex - b.argumentIndex)
+        .map(someArgs => someArgs.eventPropertyPath);
+    return handlerArgs;
+}
+exports.findHandlerArguments = findHandlerArguments;
+function isModelListener(listener) {
+    return (typeof listener.selector !== "string");
+}
+exports.isModelListener = isModelListener;
+function isDomListener(listener) {
+    return !isModelListener(listener);
+}
+exports.isDomListener = isDomListener;
+/**
+ * For every instance of ViewConstructor will created instance of CreateController
+ * ```ts
+ * // bind by classes
+ * *@forView(MyView)
+ * class MyController extends Controller<MyModel> {}
+ *
+ * // or create controller instance manually
+ * *@forView(MyView, (model: MyModel) =>
+ *    new MyController(model, ...someOptions)
+ * )
+ * class MyController extends Controller<MyModel> {}
+ *
+ * ````
+ * @param ViewConstructor for every this View
+ * @param CreateController create this Controller
+ */
+function forView(ViewConstructor, CreateController) {
+    return (ControllerClass) => {
+        mvcEvents_1.mvcEvents.on("initView", (event) => {
+            if (!(event.view instanceof ViewConstructor)) {
+                return;
+            }
+            createControllersForView(event.view, event.model);
+        });
+        function createControllersForView(view, model) {
+            const originalEmit = model.emit;
+            model.emit = (eventType) => {
+                throw new Error(`${ControllerClass.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
+            };
+            const controller = CreateController ?
+                CreateController(model) :
+                new ControllerClass(model);
+            const listenersMeta = getListeners(controller);
+            const domListenersMeta = listenersMeta.filter(isDomListener);
+            const domListeners = [];
+            for (const meta of domListenersMeta) {
+                const domListener = new DOMListener_1.DOMListener({
+                    eventType: meta.eventType,
+                    selector: meta.selector,
+                    handlerArgs: meta.handlerArgs,
+                    handler: meta.handler,
+                    view
+                });
+                domListener.listen();
+                domListeners.push(domListener);
+            }
+            mvcEvents_1.mvcEvents.once("destroyView", (event) => {
+                if (event.view !== view) {
+                    return;
+                }
+                for (const domListener of domListeners) {
+                    domListener.destroy();
+                }
+                controller.destroy();
+                domListeners.splice(0);
+            });
+            model.emit = originalEmit;
+        }
+    };
+}
+exports.forView = forView;
+
+
+/***/ }),
+
 /***/ "./lib/Model.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -517,8 +560,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.View = void 0;
 const React = __importStar(__webpack_require__("react"));
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
-const DOMEvents_1 = __webpack_require__("./lib/DOMEvents.ts");
-const domEvents = new DOMEvents_1.DOMEvents();
+const mvcEvents_1 = __webpack_require__("./lib/mvcEvents.ts");
 /**
  * Base View layer
  * @extends React.Component
@@ -527,32 +569,11 @@ class View extends React.Component {
     constructor(props) {
         super(props);
         this.model = props.model;
-        this.createControllers();
         this.listenModelChanges();
-    }
-    createControllers() {
-        const Controllers = this.controllers(this.model);
-        this.controllersInstances = [];
-        const originalEmit = this.model.emit;
-        let CurrentConstructor;
-        this.model.emit = (eventType) => {
-            throw new Error(`${CurrentConstructor.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
-        };
-        for (const ConstructorOrInstance of Controllers) {
-            if (typeof ConstructorOrInstance === "function") {
-                CurrentConstructor = ConstructorOrInstance;
-                const controller = new CurrentConstructor(this.model);
-                domEvents.addController(controller, this);
-                this.controllersInstances.push(controller);
-            }
-            else {
-                const controller = ConstructorOrInstance;
-                CurrentConstructor = controller.constructor;
-                domEvents.addController(controller, this);
-                this.controllersInstances.push(controller);
-            }
-        }
-        this.model.emit = originalEmit;
+        mvcEvents_1.mvcEvents.emit("initView", {
+            view: this,
+            model: this.model
+        });
     }
     listenModelChanges() {
         this.model.on("change", (changes) => {
@@ -569,13 +590,12 @@ class View extends React.Component {
     componentWillUnmount() {
         // clear memory leaks
         this.onDestroy();
+        mvcEvents_1.mvcEvents.emit("destroyView", {
+            view: this,
+            model: this.model
+        });
         const rootEl = ReactDOM.findDOMNode(this);
         delete rootEl._model;
-        domEvents.destroyListeners(this);
-        for (const controller of this.controllersInstances) {
-            controller.destroy();
-        }
-        this.controllersInstances = [];
     }
     /**
      * Detach listeners and fix any memory leaks.
@@ -584,15 +604,9 @@ class View extends React.Component {
     onDestroy() {
         // redefine me
     }
-    /**
-     * Register controllers.
-     * Should be function who returns list of Controllers constructors
-     */
-    controllers(model) {
-        return [];
-    }
 }
 exports.View = View;
+View.ui = {};
 
 
 /***/ }),
@@ -622,16 +636,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.arg = exports.on = exports.Controller = exports.View = exports.Model = exports.EventEmitter = exports.ReactDOM = exports.React = void 0;
+exports.forView = exports.arg = exports.on = exports.Controller = exports.View = exports.Model = exports.EventEmitter = exports.ReactDOM = exports.React = void 0;
 const React = __importStar(__webpack_require__("react"));
 exports.React = React;
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
 exports.ReactDOM = ReactDOM;
 const events_1 = __webpack_require__("events");
 Object.defineProperty(exports, "EventEmitter", { enumerable: true, get: function () { return events_1.EventEmitter; } });
-const ControllerMeta_1 = __webpack_require__("./lib/ControllerMeta.ts");
-Object.defineProperty(exports, "on", { enumerable: true, get: function () { return ControllerMeta_1.on; } });
-Object.defineProperty(exports, "arg", { enumerable: true, get: function () { return ControllerMeta_1.arg; } });
+const Meta_1 = __webpack_require__("./lib/Meta.ts");
+Object.defineProperty(exports, "on", { enumerable: true, get: function () { return Meta_1.on; } });
+Object.defineProperty(exports, "arg", { enumerable: true, get: function () { return Meta_1.arg; } });
+Object.defineProperty(exports, "forView", { enumerable: true, get: function () { return Meta_1.forView; } });
 const Model_1 = __webpack_require__("./lib/Model.ts");
 Object.defineProperty(exports, "Model", { enumerable: true, get: function () { return Model_1.Model; } });
 const View_1 = __webpack_require__("./lib/View.ts");
@@ -647,8 +662,9 @@ if (typeof window !== "undefined") {
         Model: Model_1.Model,
         View: View_1.View,
         Controller: Controller_1.Controller,
-        on: ControllerMeta_1.on,
-        arg: ControllerMeta_1.arg
+        on: Meta_1.on,
+        arg: Meta_1.arg,
+        forView: Meta_1.forView
     };
     if (!windowObj.React) {
         windowObj.React = React;
@@ -660,6 +676,19 @@ if (typeof window !== "undefined") {
         windowObj.EventEmitter = events_1.EventEmitter;
     }
 }
+
+
+/***/ }),
+
+/***/ "./lib/mvcEvents.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.mvcEvents = void 0;
+const events_1 = __webpack_require__("events");
+exports.mvcEvents = new events_1.EventEmitter();
 
 
 /***/ }),

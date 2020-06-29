@@ -1,10 +1,12 @@
-import { Controller, on, arg } from "mvc-tsx";
+import { Controller, on, arg, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
 import { TodoStatus } from "../todo/TodoModel";
+import { AppView } from "../AppView";
 
+@forView(AppView)
 export class ToggleAllTodosStatusController extends Controller<AppModel> {
 
-    @on("change", ".ToggleAllStatus")
+    @on("change", AppView.ui.toggleAllStatus)
     onChangeToggleAll(
         @arg("target", "checked") checked: boolean
     ) {

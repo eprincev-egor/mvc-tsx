@@ -1,5 +1,8 @@
 import { Model } from "./Model";
 import { Controller } from "./Controller";
+import { View } from "./View";import { mvcEvents } from "./mvcEvents";
+import { DOMListener } from "./DOMListener";
+;
 
 type TModelConstructor = new(...args: any[]) => Model;
 
@@ -28,6 +31,17 @@ export interface IListener {
 
 /**
  * Attach handler to View DOM events like are click, or model events.
+ * ```js
+ * class MyController extends Controller<MyModel> {
+ * 
+ *     // listen dom event
+ *     *@on("click", MyView.ui.button)
+ *     onClickButton() {
+ *         // some action
+ *     }
+ * 
+ * }
+ * ```
  * @param eventTypeOrModel any DOM Event type or Model constructor
  * @param selectorOrModelEventType selector like are: ".my-class" or model eventType  
  * Selectors like are ".a .b .c" does not supported.
@@ -75,7 +89,21 @@ type KeyOfDOMEvent = (
     keyof KeyboardEvent
 )
 /**
- * Get some value from event 
+ * Get some value from event object
+ * ```ts
+ * class MyController extends Controller<MyModel> {
+ * 
+ *     *@on("change", MyView.ui.input)
+ *     onChangeInput(
+ *         // get changed input value:
+ *         // event.target.value
+ *         *@arg("target", "value") inputValue: string
+ *     ) {
+ *         // some action
+ *     }
+ * 
+ * }
+ * ```
  * @param firstKey keyof dom event object
  * @param secondKey keyof Event[firstKey], next step in property path.
  * @param otherPropertyPath other keys
@@ -192,4 +220,85 @@ export function isModelListener(listener: IListener) {
 
 export function isDomListener(listener: IListener) {
     return !isModelListener(listener);
+}
+
+type TViewConstructor<TModel extends Model> = new (...args: any[]) => View<TModel>;
+type TControllerConstructor<TModel extends Model> = new (...args: any[]) => Controller<TModel>;
+type TCreateController<TModel extends Model> = (model: TModel) => Controller<TModel>;
+
+/**
+ * For every instance of ViewConstructor will created instance of CreateController
+ * ```ts
+ * // bind by classes
+ * *@forView(MyView)
+ * class MyController extends Controller<MyModel> {}
+ * 
+ * // or create controller instance manually
+ * *@forView(MyView, (model: MyModel) => 
+ *    new MyController(model, ...someOptions)
+ * )
+ * class MyController extends Controller<MyModel> {}
+ * 
+ * ````
+ * @param ViewConstructor for every this View
+ * @param CreateController create this Controller
+ */
+export function forView<TModel extends Model>(
+    ViewConstructor: TViewConstructor<TModel>,
+    CreateController?: TCreateController<TModel>
+) {
+    return (ControllerClass: TControllerConstructor<TModel>) => {
+        mvcEvents.on("initView", (event: {view: any, model: any}) => {
+            if ( !(event.view instanceof ViewConstructor) ) {
+                return;
+            }
+
+            createControllersForView(event.view, event.model);
+        });
+
+        function createControllersForView(view: View<any>, model: TModel) {
+
+            const originalEmit = model.emit;
+            model.emit = (eventType: string) => {
+                throw new Error(`${ControllerClass.name}: it is forbidden to emit any model event inside the controller constructor. Triggered "${eventType}"`);
+            };
+
+            const controller = CreateController ? 
+                CreateController(model) :
+                new ControllerClass(model);
+            
+            const listenersMeta = getListeners(controller);
+            const domListenersMeta = listenersMeta.filter(isDomListener);
+            const domListeners: DOMListener[] = [];
+    
+            for (const meta of domListenersMeta) {
+                const domListener = new DOMListener({
+                    eventType: meta.eventType as keyof HTMLElementEventMap,
+                    selector: meta.selector as string,
+                    handlerArgs: meta.handlerArgs,
+                    handler: meta.handler,
+                    view
+                });
+
+                domListener.listen(); 
+                domListeners.push(domListener);
+            }
+
+            mvcEvents.once("destroyView", (event: {view: View<any>}) => {
+                if ( event.view !== view ) {
+                    return;
+                }
+
+                for (const domListener of domListeners) {
+                    domListener.destroy();
+                }
+
+                controller.destroy();
+                domListeners.splice(0);
+            });
+            
+            model.emit = originalEmit;
+        }
+
+    };
 }

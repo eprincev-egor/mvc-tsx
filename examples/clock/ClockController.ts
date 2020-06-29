@@ -1,6 +1,8 @@
-import { Controller } from "mvc-tsx";
+import { Controller, forView } from "mvc-tsx";
 import { ClockModel } from "./ClockModel";
+import { ClockView } from "./ClockView";
 
+@forView(ClockView)
 export class ClockController extends Controller<ClockModel> {
     
     constructor(model: ClockModel) {

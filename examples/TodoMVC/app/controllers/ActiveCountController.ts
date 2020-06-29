@@ -1,7 +1,9 @@
-import { Controller, on } from "mvc-tsx";
+import { Controller, on, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
+import { AppView } from "../AppView";
 import { TodoModel } from "../todo/TodoModel";
 
+@forView(AppView)
 export class ActiveCountController extends Controller<AppModel> {
 
     constructor(app: AppModel) {
