@@ -1,0 +1,15 @@
+.Desktop {
+    position: relative;
+
+    width: 50%;
+    height: 50%;
+
+    border: 1px solid grey;
+    border-radius: 1em;
+    background: repeating-linear-gradient(
+        -45deg, 
+        transparent 0 10px,
+      grey 10px 10px,
+      grey 11px 11px
+    );
+}

@@ -65,22 +65,26 @@ export class DOMListener {
     }
 
     private getHandlerArgs(event: Event) {
-        const args: any[] = this.handlerArgs.map((eventPropertyPath) => {
-            if ( typeof eventPropertyPath === "function" ) {
-                const ModelConstructor = eventPropertyPath;
-                const model = getNearestModelByEvent(event, ModelConstructor);
-                if ( !model ) {
-                    throw new Error("cannot find model: " + ModelConstructor.name);
-                }
-                return model;
-            }
-            else {
-                const argValue = getPropertyFromEvent(event, eventPropertyPath);
-                return argValue;
-            }
-        });
+        const args: any[] = this.handlerArgs.map((eventPropertyPath) => 
+            this.getEventArg(eventPropertyPath)
+        );
 
         return args;
+    }
+
+    private getEventArg(eventPropertyPath: string[] | (new (...args: any[]) => Model)) {
+        if ( typeof eventPropertyPath === "function" ) {
+            const ModelConstructor = eventPropertyPath;
+            const model = getNearestModelByEvent(event, ModelConstructor);
+            if ( !model ) {
+                throw new Error("cannot find model: " + ModelConstructor.name);
+            }
+            return model;
+        }
+        else {
+            const argValue = getPropertyFromEvent(event, eventPropertyPath);
+            return argValue;
+        }
     }
 }
 

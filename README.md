@@ -84,3 +84,4 @@ ReactDOM.render(
 [counter](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/counter)  
 [cart](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/cart)  
 [TodoMVC](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/TodoMVC)  
+[drag and drop](https://github.com/eprincev-egor/mvc-tsx/tree/master/examples/desktop)  

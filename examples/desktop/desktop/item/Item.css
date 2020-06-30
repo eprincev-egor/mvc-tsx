@@ -1,0 +1,24 @@
+.Item {
+    position: absolute;
+}
+
+.Item:before {
+    content: "";
+    display: block;
+    background: lightblue;
+    width: 64px;
+    height: 64px;
+}
+
+.Item--label {
+    font-weight: bold;
+}
+
+.Item-selected {
+    border: 2px solid hotpink;
+    border-radius: 0.25em;
+}
+
+.Item-editing .Item--label {
+    display: none;
+}

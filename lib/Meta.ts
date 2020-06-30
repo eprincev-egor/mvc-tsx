@@ -86,7 +86,8 @@ export function on(
 type KeyOfDOMEvent = (
     keyof Event |
     keyof MouseEvent |
-    keyof KeyboardEvent
+    keyof KeyboardEvent |
+    keyof DragEvent
 )
 /**
  * Get some value from event object

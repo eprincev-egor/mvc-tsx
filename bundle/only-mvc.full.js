@@ -234,21 +234,22 @@ class DOMListener {
         return thisIsValidTarget;
     }
     getHandlerArgs(event) {
-        const args = this.handlerArgs.map((eventPropertyPath) => {
-            if (typeof eventPropertyPath === "function") {
-                const ModelConstructor = eventPropertyPath;
-                const model = getNearestModelByEvent_1.getNearestModelByEvent(event, ModelConstructor);
-                if (!model) {
-                    throw new Error("cannot find model: " + ModelConstructor.name);
-                }
-                return model;
-            }
-            else {
-                const argValue = getPropertyFromEvent_1.getPropertyFromEvent(event, eventPropertyPath);
-                return argValue;
-            }
-        });
+        const args = this.handlerArgs.map((eventPropertyPath) => this.getEventArg(eventPropertyPath));
         return args;
+    }
+    getEventArg(eventPropertyPath) {
+        if (typeof eventPropertyPath === "function") {
+            const ModelConstructor = eventPropertyPath;
+            const model = getNearestModelByEvent_1.getNearestModelByEvent(event, ModelConstructor);
+            if (!model) {
+                throw new Error("cannot find model: " + ModelConstructor.name);
+            }
+            return model;
+        }
+        else {
+            const argValue = getPropertyFromEvent_1.getPropertyFromEvent(event, eventPropertyPath);
+            return argValue;
+        }
     }
 }
 exports.DOMListener = DOMListener;
@@ -726,7 +727,11 @@ exports.getPropertyFromEvent = void 0;
 function getPropertyFromEvent(event, propertyPath) {
     let eventPropertyValue = event;
     for (const key of propertyPath) {
-        eventPropertyValue = eventPropertyValue[key];
+        let nextValue = eventPropertyValue[key];
+        if (typeof nextValue === "function") {
+            nextValue = nextValue.bind(eventPropertyValue);
+        }
+        eventPropertyValue = nextValue;
     }
     return eventPropertyValue;
 }
