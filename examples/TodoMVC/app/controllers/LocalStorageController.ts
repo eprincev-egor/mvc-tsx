@@ -1,7 +1,9 @@
-import { Controller, on } from "mvc-tsx";
+import { Controller, on, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
+import { AppView } from "../AppView";
 import { TodoModel, ITodoRow } from "../todo/TodoModel";
 
+@forView(AppView)
 export class LocalStorageController extends Controller<AppModel> {
     private loading: boolean = false;
 

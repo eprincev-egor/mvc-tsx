@@ -1,5 +1,5 @@
 import { Model } from "./Model";
-import { getListeners, isModelListener, findHandlerArguments } from "./ControllerMeta";
+import { getListeners, isModelListener, findHandlerArguments } from "./Meta";
 
 export abstract class Controller<TModel extends Model> {
     protected model: Readonly<TModel>;

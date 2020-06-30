@@ -1,6 +1,8 @@
-import { Controller, on } from "mvc-tsx";
+import { Controller, on, forView } from "mvc-tsx";
 import { TodoModel } from "../TodoModel";
+import { TodoView } from "../TodoView";
 
+@forView(TodoView)
 export class ToggleStatusController extends Controller<TodoModel> {
 
     @on("change", ".ToggleStatus")

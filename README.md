@@ -14,17 +14,36 @@ class LoginModel extends Model {
     password: string = "";
 }
 
+// define View
+class LoginView extends View<LoginModel> {
+    
+    // declare interactive elements
+    static ui = {
+        loginInput: ".Login--loginInput.",
+        passInput: ".Login--passInput"
+    };
+
+    template(loginModel: LoginModel>) {
+        return (<div className="Login">
+            <input className="Login--loginInput"/>
+            <input className="Login--passInput"/>
+        </div>);
+    }
+
+}
+
 // define Controller
+@forView(LoginView)
 class LoginController extends Controller<LoginModel> {
 
-    @on("change", ".Login--loginInput")
+    @on("change", LoginView.ui.loginInput)
     onChangeLogin( @arg("target", "value") inputValue ) {
         this.model.set({
             login: inputValue
         });
     }
 
-    @on("change", ".Login--passInput")
+    @on("change", LoginView.ui.passInput)
     onChangePassword( @arg("target", "value") inputValue ) {
         this.model.set({
             password: inputValue
@@ -36,25 +55,6 @@ class LoginController extends Controller<LoginModel> {
         const {login, password} = this.model;
         // do login ...
     }
-}
-
-// define View
-class LoginView extends View<LoginModel> {
-    
-    // list of Controllers
-    controllers() {
-        return [
-            LoginController
-        ];
-    }
-
-    template(loginModel: LoginModel>) {
-        return (<div className="Login">
-            <input className="Login--loginInput"/>
-            <input className="Login--passInput"/>
-        </div>);
-    }
-
 }
 
 // and render

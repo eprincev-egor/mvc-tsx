@@ -5,6 +5,11 @@ import { formatPrice } from "../../utils/formatPrice";
 import "./CartPosition.css";
 
 export class CartPositionView extends View<CartPositionModel> {
+    
+    static ui = {
+        incrementQuantity: ".CartPosition--incrementQuantityBtn",
+        decrementQuantity: ".CartPosition--decrementQuantityBtn"
+    };
 
     template(position: CartPositionModel) {
         return <div className="CartPosition">

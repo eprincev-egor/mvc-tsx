@@ -5,6 +5,10 @@ import { formatPrice } from "../utils/formatPrice";
 import "./Product.css";
 
 export class ProductView extends View<ProductModel> {
+    
+    static ui = {
+        addToCart: ".Product--addToCartBtn"
+    };
 
     template(product: ProductModel) {
         return <div className="Product">

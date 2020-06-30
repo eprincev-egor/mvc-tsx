@@ -2,19 +2,14 @@ import React from "react";
 import { View } from "mvc-tsx";
 import { CartModel } from "./CartModel";
 import { CartPositionView } from "./position/CartPositionView";
-import { QuantityController } from "./QuantityController";
-import { ClearCartController } from "./ClearCartController";
 import { formatPrice } from "../utils/formatPrice";
 import "./Cart.css";
 
 export class CartView extends View<CartModel> {
 
-    controllers() {
-        return [
-            QuantityController,
-            ClearCartController
-        ];
-    }
+    static ui = {
+        clear: ".Cart--clearBtn"
+    };
 
     template(cart: CartModel) {
         return <div className="Cart">
