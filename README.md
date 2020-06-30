@@ -19,14 +19,16 @@ class LoginView extends View<LoginModel> {
     
     // declare interactive elements
     static ui = {
-        loginInput: ".Login--loginInput.",
-        passInput: ".Login--passInput"
+        loginInput: ".Login--loginInput",
+        passInput: ".Login--passInput",
+        loginButton: ".Login--loginBtn"
     };
 
-    template(loginModel: LoginModel>) {
+    template(loginModel: LoginModel) {
         return (<div className="Login">
             <input className="Login--loginInput"/>
             <input className="Login--passInput"/>
+            <button className="Login--loginBtn"></button>
         </div>);
     }
 
@@ -37,20 +39,20 @@ class LoginView extends View<LoginModel> {
 class LoginController extends Controller<LoginModel> {
 
     @on("change", LoginView.ui.loginInput)
-    onChangeLogin( @arg("target", "value") inputValue ) {
+    onChangeLogin( @arg("target", "value") inputValue: string ) {
         this.model.set({
             login: inputValue
         });
     }
 
     @on("change", LoginView.ui.passInput)
-    onChangePassword( @arg("target", "value") inputValue ) {
+    onChangePassword( @arg("target", "value") inputValue: string ) {
         this.model.set({
             password: inputValue
         });
     }
 
-    @on("click", ".User--loginBtn")
+    @on("click", LoginView.ui.loginButton)
     onClickLogin() {
         const {login, password} = this.model;
         // do login ...
