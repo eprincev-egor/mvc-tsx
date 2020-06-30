@@ -203,17 +203,9 @@ exports.CartView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const CartPositionView_1 = __webpack_require__("./examples/cart/cart/position/CartPositionView.tsx");
-const QuantityController_1 = __webpack_require__("./examples/cart/cart/QuantityController.ts");
-const ClearCartController_1 = __webpack_require__("./examples/cart/cart/ClearCartController.ts");
 const formatPrice_1 = __webpack_require__("./examples/cart/utils/formatPrice.ts");
 __webpack_require__("./examples/cart/cart/Cart.css");
 class CartView extends mvc_tsx_1.View {
-    controllers() {
-        return [
-            QuantityController_1.QuantityController,
-            ClearCartController_1.ClearCartController
-        ];
-    }
     template(cart) {
         return react_1.default.createElement("div", { className: "Cart" },
             react_1.default.createElement("div", { className: "Cart--label" }, "Cart:"),
@@ -226,11 +218,14 @@ class CartView extends mvc_tsx_1.View {
     }
 }
 exports.CartView = CartView;
+CartView.ui = {
+    clear: ".Cart--clearBtn"
+};
 
 
 /***/ }),
 
-/***/ "./examples/cart/cart/ClearCartController.ts":
+/***/ "./examples/cart/cart/controllers/ClearCartController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -247,24 +242,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClearCartController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-class ClearCartController extends mvc_tsx_1.Controller {
+const CartView_1 = __webpack_require__("./examples/cart/cart/CartView.tsx");
+let ClearCartController = class ClearCartController extends mvc_tsx_1.Controller {
     onClickClear() {
         const cart = this.model;
         cart.clear();
     }
-}
+};
 __decorate([
-    mvc_tsx_1.on("click", ".Cart--clearBtn"),
+    mvc_tsx_1.on("click", CartView_1.CartView.ui.clear),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClearCartController.prototype, "onClickClear", null);
+ClearCartController = __decorate([
+    mvc_tsx_1.forView(CartView_1.CartView)
+], ClearCartController);
 exports.ClearCartController = ClearCartController;
 
 
 /***/ }),
 
-/***/ "./examples/cart/cart/QuantityController.ts":
+/***/ "./examples/cart/cart/controllers/QuantityController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -285,7 +284,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuantityController = void 0;
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const CartPositionModel_1 = __webpack_require__("./examples/cart/cart/position/CartPositionModel.ts");
-class QuantityController extends mvc_tsx_1.Controller {
+const CartPositionView_1 = __webpack_require__("./examples/cart/cart/position/CartPositionView.tsx");
+const __1 = __webpack_require__("./examples/cart/cart/index.ts");
+let QuantityController = class QuantityController extends mvc_tsx_1.Controller {
     onClickIncrement(position) {
         const cart = this.model;
         cart.incrementPositionQuantity(position);
@@ -294,22 +295,44 @@ class QuantityController extends mvc_tsx_1.Controller {
         const cart = this.model;
         cart.decrementPositionQuantity(position);
     }
-}
+};
 __decorate([
-    mvc_tsx_1.on("click", ".CartPosition--incrementQuantityBtn"),
+    mvc_tsx_1.on("click", CartPositionView_1.CartPositionView.ui.incrementQuantity),
     __param(0, mvc_tsx_1.arg(CartPositionModel_1.CartPositionModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [CartPositionModel_1.CartPositionModel]),
     __metadata("design:returntype", void 0)
 ], QuantityController.prototype, "onClickIncrement", null);
 __decorate([
-    mvc_tsx_1.on("click", ".CartPosition--decrementQuantityBtn"),
+    mvc_tsx_1.on("click", CartPositionView_1.CartPositionView.ui.decrementQuantity),
     __param(0, mvc_tsx_1.arg(CartPositionModel_1.CartPositionModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [CartPositionModel_1.CartPositionModel]),
     __metadata("design:returntype", void 0)
 ], QuantityController.prototype, "onClickDecrement", null);
+QuantityController = __decorate([
+    mvc_tsx_1.forView(__1.CartView)
+], QuantityController);
 exports.QuantityController = QuantityController;
+
+
+/***/ }),
+
+/***/ "./examples/cart/cart/index.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.QuantityController = exports.ClearCartController = exports.CartView = exports.CartModel = void 0;
+const CartView_1 = __webpack_require__("./examples/cart/cart/CartView.tsx");
+Object.defineProperty(exports, "CartView", { enumerable: true, get: function () { return CartView_1.CartView; } });
+const ClearCartController_1 = __webpack_require__("./examples/cart/cart/controllers/ClearCartController.ts");
+Object.defineProperty(exports, "ClearCartController", { enumerable: true, get: function () { return ClearCartController_1.ClearCartController; } });
+const QuantityController_1 = __webpack_require__("./examples/cart/cart/controllers/QuantityController.ts");
+Object.defineProperty(exports, "QuantityController", { enumerable: true, get: function () { return QuantityController_1.QuantityController; } });
+const CartModel_1 = __webpack_require__("./examples/cart/cart/CartModel.ts");
+Object.defineProperty(exports, "CartModel", { enumerable: true, get: function () { return CartModel_1.CartModel; } });
 
 
 /***/ }),
@@ -410,6 +433,10 @@ class CartPositionView extends mvc_tsx_1.View {
     }
 }
 exports.CartPositionView = CartPositionView;
+CartPositionView.ui = {
+    incrementQuantity: ".CartPosition--incrementQuantityBtn",
+    decrementQuantity: ".CartPosition--decrementQuantityBtn"
+};
 
 
 /***/ }),
@@ -442,10 +469,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __importStar(__webpack_require__("react"));
 const ReactDOM = __importStar(__webpack_require__("react-dom"));
 const products_1 = __webpack_require__("./examples/cart/products.ts");
-const RootView_1 = __webpack_require__("./examples/cart/root/RootView.tsx");
-const RootModel_1 = __webpack_require__("./examples/cart/root/RootModel.ts");
-const rootModel = new RootModel_1.RootModel(products_1.products);
-ReactDOM.render(React.createElement(RootView_1.RootView, { model: rootModel }), document.getElementById("root"));
+const root_1 = __webpack_require__("./examples/cart/root/index.ts");
+const rootModel = new root_1.RootModel(products_1.products);
+ReactDOM.render(React.createElement(root_1.RootView, { model: rootModel }), document.getElementById("root"));
 
 
 /***/ }),
@@ -521,6 +547,24 @@ class ProductView extends mvc_tsx_1.View {
     }
 }
 exports.ProductView = ProductView;
+ProductView.ui = {
+    addToCart: ".Product--addToCartBtn"
+};
+
+
+/***/ }),
+
+/***/ "./examples/cart/product/index.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProductView = exports.ProductModel = void 0;
+const ProductModel_1 = __webpack_require__("./examples/cart/product/ProductModel.ts");
+Object.defineProperty(exports, "ProductModel", { enumerable: true, get: function () { return ProductModel_1.ProductModel; } });
+const ProductView_1 = __webpack_require__("./examples/cart/product/ProductView.tsx");
+Object.defineProperty(exports, "ProductView", { enumerable: true, get: function () { return ProductView_1.ProductView; } });
 
 
 /***/ }),
@@ -539,48 +583,6 @@ exports.products = [
     new ProductModel_1.ProductModel("Bread", 1),
     new ProductModel_1.ProductModel("Juice", 5)
 ];
-
-
-/***/ }),
-
-/***/ "./examples/cart/root/AddToCartController.ts":
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddToCartController = void 0;
-const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-const ProductModel_1 = __webpack_require__("./examples/cart/product/ProductModel.ts");
-class AddToCartController extends mvc_tsx_1.Controller {
-    // we can listen click to sub views
-    onClickAddToCart(
-    // and get nearest Model from event
-    product) {
-        // call cart business logic
-        this.model.cart.addProduct(product);
-    }
-}
-__decorate([
-    mvc_tsx_1.on("click", ".Product--addToCartBtn"),
-    __param(0, mvc_tsx_1.arg(ProductModel_1.ProductModel)),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [ProductModel_1.ProductModel]),
-    __metadata("design:returntype", void 0)
-], AddToCartController.prototype, "onClickAddToCart", null);
-exports.AddToCartController = AddToCartController;
 
 
 /***/ }),
@@ -643,24 +645,82 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RootView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
-const ProductView_1 = __webpack_require__("./examples/cart/product/ProductView.tsx");
-const CartView_1 = __webpack_require__("./examples/cart/cart/CartView.tsx");
-const AddToCartController_1 = __webpack_require__("./examples/cart/root/AddToCartController.ts");
+const product_1 = __webpack_require__("./examples/cart/product/index.ts");
+const cart_1 = __webpack_require__("./examples/cart/cart/index.ts");
 __webpack_require__("./examples/cart/root/Root.css");
 class RootView extends mvc_tsx_1.View {
-    controllers() {
-        return [
-            AddToCartController_1.AddToCartController
-        ];
-    }
     template(root) {
         return react_1.default.createElement("div", { className: "Root" },
-            react_1.default.createElement("div", { className: "Root--products" }, root.products.map(product => react_1.default.createElement(ProductView_1.ProductView, { model: product, key: product.name }))),
+            react_1.default.createElement("div", { className: "Root--products" }, root.products.map(product => react_1.default.createElement(product_1.ProductView, { model: product, key: product.name }))),
             react_1.default.createElement("div", { className: "Root--cart" },
-                react_1.default.createElement(CartView_1.CartView, { model: root.cart })));
+                react_1.default.createElement(cart_1.CartView, { model: root.cart })));
     }
 }
 exports.RootView = RootView;
+
+
+/***/ }),
+
+/***/ "./examples/cart/root/controllers/AddToCartController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AddToCartController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const product_1 = __webpack_require__("./examples/cart/product/index.ts");
+const product_2 = __webpack_require__("./examples/cart/product/index.ts");
+const RootView_1 = __webpack_require__("./examples/cart/root/RootView.tsx");
+let AddToCartController = class AddToCartController extends mvc_tsx_1.Controller {
+    // we can listen click to sub views
+    onClickAddToCart(
+    // and get nearest Model from event
+    product) {
+        // call cart business logic
+        this.model.cart.addProduct(product);
+    }
+};
+__decorate([
+    mvc_tsx_1.on("click", product_2.ProductView.ui.addToCart),
+    __param(0, mvc_tsx_1.arg(product_1.ProductModel)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [product_1.ProductModel]),
+    __metadata("design:returntype", void 0)
+], AddToCartController.prototype, "onClickAddToCart", null);
+AddToCartController = __decorate([
+    mvc_tsx_1.forView(RootView_1.RootView)
+], AddToCartController);
+exports.AddToCartController = AddToCartController;
+
+
+/***/ }),
+
+/***/ "./examples/cart/root/index.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AddToCartController = exports.RootModel = exports.RootView = void 0;
+const RootView_1 = __webpack_require__("./examples/cart/root/RootView.tsx");
+Object.defineProperty(exports, "RootView", { enumerable: true, get: function () { return RootView_1.RootView; } });
+const RootModel_1 = __webpack_require__("./examples/cart/root/RootModel.ts");
+Object.defineProperty(exports, "RootModel", { enumerable: true, get: function () { return RootModel_1.RootModel; } });
+const AddToCartController_1 = __webpack_require__("./examples/cart/root/controllers/AddToCartController.ts");
+Object.defineProperty(exports, "AddToCartController", { enumerable: true, get: function () { return AddToCartController_1.AddToCartController; } });
 
 
 /***/ }),

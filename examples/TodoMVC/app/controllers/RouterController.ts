@@ -1,6 +1,8 @@
-import { Controller } from "mvc-tsx";
+import { Controller, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
+import { AppView } from "../AppView";
 
+@forView(AppView)
 export class RouterController extends Controller<AppModel> {
     constructor(app: AppModel) {
         super(app);

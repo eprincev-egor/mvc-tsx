@@ -2,17 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { View } from "mvc-tsx";
 import { TodoModel, TodoStatus } from "./TodoModel";
-import { ToggleStatusController } from "./controllers/ToggleStatusController";
-import { EditNameController } from "./controllers/EditNameController";
 
 export class TodoView extends View<TodoModel> {
     
-    controllers() {
-        return [
-            ToggleStatusController,
-            EditNameController
-        ];
-    }
+    static ui = {
+        nameInput: ".EditNameInput",
+        startEdit: ".StartEdit",
+        remove: ".RemoveTodo"
+    };
     
     template(todo: TodoModel) {
         let content!: JSX.Element;

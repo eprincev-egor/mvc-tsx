@@ -1,17 +1,11 @@
 import React from "react";
 import { View } from "mvc-tsx";
 import { RootModel } from "./RootModel";
-import { ProductView } from "../product/ProductView";
-import { CartView } from "../cart/CartView";
-import { AddToCartController } from "./AddToCartController";
+import { ProductView } from "../product";
+import { CartView } from "../cart";
 import "./Root.css";
 
 export class RootView extends View<RootModel> {
-    controllers() {
-        return [
-            AddToCartController
-        ];
-    }
 
     template(root: RootModel) {
         return <div className="Root">

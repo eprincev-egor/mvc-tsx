@@ -3,7 +3,7 @@ import { render, unmountComponentAtNode } from "react-dom";
 import { JSDOM } from "jsdom";
 import { act } from "react-dom/test-utils";
 import assert from "assert";
-import { Controller, View, Model, on, arg } from "../lib";
+import { Controller, View, Model, on, arg, forView } from "../lib";
 import { DOMListener } from "../lib/DOMListener";
 
 describe("Controller", () => {
@@ -31,20 +31,9 @@ describe("Controller", () => {
             counter: number = 0;
         }
 
-        class MyController extends Controller<MyModel> {
-            @on("click", ".button")
-            onClickButton() {
-                this.model.set({
-                    counter: this.model.counter + 1
-                });
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
+            static ui = {
+                button: ".button"
             }
 
             template(model: MyModel) {
@@ -53,6 +42,18 @@ describe("Controller", () => {
                     <button className="button"></button>
                 </div>
             }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("click", MyView.ui.button)
+            onClickButton() {
+                this.model.set({
+                    counter: this.model.counter + 1
+                });
+            }
+
         }
 
         const testModel = new MyModel();
@@ -76,21 +77,7 @@ describe("Controller", () => {
             c: number = 0;
         }
 
-        class MyController extends Controller<MyModel> {
-            @on(MyModel, "change")
-            onChangeModel(changes: MyModel) {
-                this.model.set({
-                    c: this.model.a + this.model.b
-                });
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
 
             template(model: MyModel) {
                 return <div>
@@ -99,6 +86,18 @@ describe("Controller", () => {
                     <div className="c">{model.c}</div>
                 </div>
             }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on(MyModel, "change")
+            onChangeModel(changes: MyModel) {
+                this.model.set({
+                    c: this.model.a + this.model.b
+                });
+            }
+        
         }
 
         const testModel = new MyModel();
@@ -152,27 +151,27 @@ describe("Controller", () => {
             name: string | undefined;
         }
 
-        class MyController extends Controller<MyModel> {
-            @on("change", ".input")
-            onChangeInput(@arg("target", "value") inputValue: string) {
-                this.model.set({
-                    name: inputValue
-                });
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
+            static ui = {
+                input: ".input"
+            };
 
             template(model: MyModel) {
                 return <div>
                     <div className="input" defaultValue=""/>
                     <div className="name">{model.name}</div>
                 </div>
+            }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("change", MyView.ui.input)
+            onChangeInput(@arg("target", "value") inputValue: string) {
+                this.model.set({
+                    name: inputValue
+                });
             }
         }
 
@@ -223,32 +222,34 @@ describe("Controller", () => {
         }
 
         class UserView extends View<UserModel> {
+            static ui = {
+                user: ".User"
+            };
+
             template(user: UserModel) {
                 return <div className="User">#{user.id} {user.name}</div>;
             }
         }
 
-        class MyController extends Controller<UsersCollection> {
-            @on("click", ".User")
-            onClickUser(@arg(UserModel) user: UserModel) {
-                this.model.set({
-                    clicked: user
-                });
-            }
-        }
-
         class UsersCollectionView extends View<UsersCollection> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
 
             template(collection: UsersCollection) {
                 return <div>{collection.users.map(user =>
                     <UserView model={user}/>
                 )}</div>;
             }
+        }
+
+        @forView(UsersCollectionView)
+        class MyController extends Controller<UsersCollection> {
+
+            @on("click", UserView.ui.user)
+            onClickUser(@arg(UserModel) user: UserModel) {
+                this.model.set({
+                    clicked: user
+                });
+            }
+        
         }
 
         const bob = new UserModel(1, "Bob");
@@ -289,8 +290,23 @@ describe("Controller", () => {
             y: number = 0;
         }
 
+        class MyView extends View<MyModel> {
+            static ui = {
+                area: ".area"
+            };
+
+            template(model: MyModel) {
+                return <div className="area">
+                    <div className="x">{model.x}</div>
+                    <div className="y">{model.y}</div>
+                </div>
+            }
+        }
+
+        @forView(MyView)
         class MyController extends Controller<MyModel> {
-            @on("mousemove", ".area")
+
+            @on("mousemove", MyView.ui.area)
             onChangeInput(
                 @arg("clientX") x: number,
                 @arg("clientY") y: number
@@ -300,21 +316,7 @@ describe("Controller", () => {
                     y
                 });
             }
-        }
 
-        class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
-
-            template(model: MyModel) {
-                return <div className="area">
-                    <div className="x">{model.x}</div>
-                    <div className="y">{model.y}</div>
-                </div>
-            }
         }
 
         const testModel = new MyModel();
@@ -342,6 +344,13 @@ describe("Controller", () => {
             value: number = 0;
         }
 
+        class MyView extends View<MyModel> {
+            template(model: MyModel) {
+                return <div className="value">{model.value}</div>
+            }
+        }
+
+        @forView(MyView)
         class MyController extends Controller<MyModel> {
             constructor(model: MyModel) {
                 super(model);
@@ -353,18 +362,6 @@ describe("Controller", () => {
                 this.model.set({
                     value: 30
                 });
-            }
-        }
-
-        class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
-
-            template(model: MyModel) {
-                return <div className="value">{model.value}</div>
             }
         }
 
@@ -385,13 +382,29 @@ describe("Controller", () => {
             clicks: number = 0;
         }
 
+        class MyView extends View<MyModel> {
+            static ui = {
+                leftButton: ".left-button",
+                rightButton: ".right-button"
+            };
+
+            template(model: MyModel) {
+                return <div className="area">
+                    <div className="clicks">{model.clicks}</div>
+                    <button className="left-button"></button>
+                    <button className="right-button"></button>
+                </div>
+            }
+        }
+
+        @forView(MyView)
         class MyController extends Controller<MyModel> {
-            @on("click", ".left-button")
+            @on("click", MyView.ui.leftButton)
             onClickLeftButton() {
                 this.bumpClicks();
             }
 
-            @on("click", ".right-button")
+            @on("click", MyView.ui.rightButton)
             onClickRightButton() {
                 this.bumpClicks();
             }
@@ -400,22 +413,6 @@ describe("Controller", () => {
                 this.model.set({
                     clicks: this.model.clicks + 1
                 });
-            }
-        }
-
-        class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
-
-            template(model: MyModel) {
-                return <div className="area">
-                    <div className="clicks">{model.clicks}</div>
-                    <button className="left-button"></button>
-                    <button className="right-button"></button>
-                </div>
             }
         }
 
@@ -444,9 +441,29 @@ describe("Controller", () => {
             parentClassName: string = "";
         }
 
+        class MyView extends View<MyModel> {
+            static ui = {
+                button: ".button"
+            };
+
+            template(model: MyModel) {
+                return <div>
+                    <div className="parentClassName">{model.parentClassName}</div>
+                    <div className="left">
+                        <div className="button"></div>
+                    </div>
+                    <div className="right">
+                        <div className="button"></div>
+                    </div>
+                </div>
+            }
+        }
+
+        @forView(MyView)
         class MyController extends Controller<MyModel> {
-            @on("click", ".btn")
-            onChangeInput(
+
+            @on("click", MyView.ui.button)
+            onClickButton(
                 @arg("target", "parentNode", "className") 
                 parentClassName: string
             ) {
@@ -454,26 +471,7 @@ describe("Controller", () => {
                     parentClassName
                 });
             }
-        }
 
-        class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
-
-            template(model: MyModel) {
-                return <div>
-                    <div className="parentClassName">{model.parentClassName}</div>
-                    <div className="left">
-                        <div className="btn"></div>
-                    </div>
-                    <div className="right">
-                        <div className="btn"></div>
-                    </div>
-                </div>
-            }
         }
 
         const testModel = new MyModel();
@@ -482,8 +480,8 @@ describe("Controller", () => {
         });
 
         const parentClassEl = document.querySelector(".parentClassName") as HTMLDivElement;
-        const leftButtonEl = document.querySelector(".left .btn") as HTMLDivElement;
-        const rightButtonEl = document.querySelector(".right .btn") as HTMLDivElement;
+        const leftButtonEl = document.querySelector(".left .button") as HTMLDivElement;
+        const rightButtonEl = document.querySelector(".right .button") as HTMLDivElement;
 
         const leftClickEvent = new window.Event("click", {bubbles: true});
         leftButtonEl.dispatchEvent(leftClickEvent);
@@ -501,24 +499,23 @@ describe("Controller", () => {
         class MyModel extends Model {}
         class UnknownModel extends Model {}
 
-        let hasCall = false;
-        class MyController extends Controller<MyModel> {
-            /* istanbul ignore next */
-            @on("click", ".some")
-            onClickButton(@arg(UnknownModel) model: UnknownModel) {
-                hasCall = true;
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
+            static ui = {
+                some: ".some"
+            };
 
             template(model: MyModel) {
                 return <div className="some"></div>
+            }
+        }
+
+        let hasCall = false;
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+            /* istanbul ignore next */
+            @on("click", MyView.ui.some)
+            onClickButton(@arg(UnknownModel) model: UnknownModel) {
+                hasCall = true;
             }
         }
 
@@ -556,24 +553,23 @@ describe("Controller", () => {
             child: ChildModel = new ChildModel();
         }
 
-        class ChildController extends Controller<ChildModel> {
-            @on("click", ".button")
-            onClickButton() {
-                controllerCallsCount++;
-            }
-        }
-
         class ChildView extends View<ChildModel> {
-            controllers() {
-                return [
-                    ChildController
-                ];
-            }
+            static ui = {
+                button: ".button"
+            };
 
             template(model: ChildModel) {
                 return <div>
                     <button className="button"></button>
                 </div>
+            }
+        }
+
+        @forView(ChildView)
+        class ChildController extends Controller<ChildModel> {
+            @on("click", ChildView.ui.button)
+            onClickButton() {
+                controllerCallsCount++;
             }
         }
 
@@ -625,26 +621,21 @@ describe("Controller", () => {
             renderElement: boolean = true;
             child: ChildModel = new ChildModel();
         }
-
+        
+        class ChildView extends View<ChildModel> {
+            template(model: ChildModel) {
+                return <div></div>
+            }
+        }
+        
+        @forView(ChildView)
         class ChildController extends Controller<ChildModel> {
             @on(ChildModel, "change")
             onClickButton() {
                 controllerCallsCount++;
             }
+
         }
-
-        class ChildView extends View<ChildModel> {
-            controllers() {
-                return [
-                    ChildController
-                ];
-            }
-
-            template(model: ChildModel) {
-                return <div></div>
-            }
-        }
-
         class ParentView extends View<ParentModel> {
             template(model: ParentModel) {
                 if ( model.renderElement ) {
@@ -725,27 +716,27 @@ describe("Controller", () => {
             counter: number = 0;
         }
 
-        class MyController extends Controller<MyModel> {
-            @on("click", ".button")
-            onClickButton() {
-                this.model.set({
-                    counter: this.model.counter + 1
-                });
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
+            static ui = {
+                button: ".button"
+            };
 
             template(model: MyModel) {
                 return <div>
                     <div className="counter">{model.counter}</div>
                     <button className="many button classes"></button>
                 </div>
+            }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("click", MyView.ui.button)
+            onClickButton() {
+                this.model.set({
+                    counter: this.model.counter + 1
+                });
             }
         }
 
@@ -785,7 +776,15 @@ describe("Controller", () => {
     it("error on model event while controllers instances are being created", () => {
         
         class MyModel extends Model {}
+        class MyView extends View<MyModel> {
 
+            /* istanbul ignore next */
+            template(model: MyModel) {
+                return <div></div>
+            }
+        }
+
+        @forView(MyView)
         class FirstController extends Controller<MyModel> {
             constructor(model: MyModel) {
                 super(model);
@@ -793,21 +792,9 @@ describe("Controller", () => {
                 model.emit("custom", "test");
             }
         }
+        @forView(MyView)
         class SecondController extends Controller<MyModel> {}
 
-        class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    FirstController,
-                    SecondController
-                ];
-            }
-
-            /* istanbul ignore next */
-            template(model: MyModel) {
-                return <div></div>
-            }
-        }
 
         const testModel = new MyModel();
 
@@ -826,24 +813,24 @@ describe("Controller", () => {
 
         class MyModel extends Model {}
 
-        class MyController extends Controller<MyModel> {
-            @on("blur", ".input")
-            onBlurInput() {
-                hasCall = true;
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
+            static ui = {
+                input: ".input"
+            };
 
             template(model: MyModel) {
                 return <div>
                     <input className="input"/>
                 </div>
+            }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("blur", MyView.ui.input)
+            onBlurInput() {
+                hasCall = true;
             }
         }
 
@@ -866,24 +853,23 @@ describe("Controller", () => {
 
         class MyModel extends Model {}
 
-        class MyController extends Controller<MyModel> {
-            @on("focus", ".input")
-            onFocusInput() {
-                hasCall = true;
-            }
-        }
-
         class MyView extends View<MyModel> {
-            controllers() {
-                return [
-                    MyController
-                ];
-            }
+            static ui = {
+                input: ".input"
+            };
 
             template(model: MyModel) {
                 return <div>
                     <input className="input"/>
                 </div>
+            }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+            @on("focus", MyView.ui.input)
+            onFocusInput() {
+                hasCall = true;
             }
         }
 
@@ -913,6 +899,44 @@ describe("Controller", () => {
             }
         }
 
+
+        class FirstModel extends Model {
+            name?: string;
+        }
+        class SecondModel extends Model {
+            email?: string;
+        }
+
+        class FirstView extends View<FirstModel> {
+            
+            template(model: FirstModel) {
+                return <div className="First">
+                    <input className="nameInput"/>
+                </div>;
+            }
+        }
+        
+        class SecondView extends View<SecondModel> {
+
+            template() {
+                return <div className="Second">
+                    <input className="emailInput"/>
+                </div>;
+            }
+        }
+
+        @forView(FirstView, (first) =>
+            new UniversalValidateController(first, {
+                key: "name",
+                selector: ".nameInput"
+            })
+        )
+        @forView(SecondView, (second) => 
+            new UniversalValidateController(second, {
+                key: "email",
+                selector: "emailInput"
+            })
+        )
         class UniversalValidateController<TModel extends Model> 
         extends Controller<TModel> {
             private options: IOptions<TModel>;
@@ -946,51 +970,8 @@ describe("Controller", () => {
                 }
             }
         }
-
-        class FirstModel extends Model {
-            name?: string;
-        }
-        class SecondModel extends Model {
-            email?: string;
-        }
-
-        class FirstView extends View<FirstModel> {
-            controllers(model: FirstModel) {
-                return [
-                    new UniversalValidateController(model, {
-                        key: "name",
-                        selector: ".nameInput"
-                    })
-                ];
-            }
-
-            template(model: FirstModel) {
-                return <div className="First">
-                    <input className="nameInput"/>
-                </div>;
-            }
-        }
-        
-        class SecondView extends View<SecondModel> {
-            controllers(model: SecondModel) {
-                return [
-                    new UniversalValidateController(model, {
-                        key: "email",
-                        selector: ".emailInput"
-                    })
-                ];
-            }
-
-            template() {
-                return <div className="Second">
-                    <input className="emailInput"/>
-                </div>;
-            }
-        }
-
         let inputEl: any;
         let changeEvent: any;
-
 
         // test FirstView and FirstModel
         const firstModel = new FirstModel();
