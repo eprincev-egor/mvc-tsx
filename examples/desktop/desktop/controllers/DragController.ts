@@ -2,17 +2,16 @@ import { Controller, on, forView, arg } from "mvc-tsx";
 import { DesktopModel } from "../DesktopModel";
 import { DesktopView } from "../DesktopView";
 import { ItemModel } from "../item";
-import { IElement } from "./IElement";
 
 @forView(DesktopView)
 export class DragController extends Controller<DesktopModel> {
 
     private target: ItemModel | undefined;
-    private desktopPosition = {
-        left: 0,
-        top: 0
+    private startItemPosition = {
+        x: 0,
+        y: 0
     };
-    private itemOffset = {
+    private startMousePosition = {
         x: 0,
         y: 0
     };
@@ -21,34 +20,39 @@ export class DragController extends Controller<DesktopModel> {
     @on("mousedown", DesktopView.ui.item)
     onDragStart(
         @arg(ItemModel) item: ItemModel,
-        @arg("target") target: IElement,
         @arg("clientX") mouseX: number,
         @arg("clientY") mouseY: number
     ) {
-        const rect = target.getBoundingClientRect();
-
         this.target = item;
-        this.desktopPosition = {
-            left: rect.left,
-            top: rect.top
+
+        this.startMousePosition = {
+            x: mouseX,
+            y: mouseY
         };
-        this.itemOffset = {
-            x: mouseX - rect.left - item.x,
-            y: mouseY - rect.top - item.y
+        this.startItemPosition = {
+            x: item.x,
+            y: item.y
         };
     }
 
     @on("mousemove", DesktopView.ui.desktop)
     onMove(
-        @arg("clientX") mouseX: number,
-        @arg("clientY") mouseY: number
+        @arg("clientX") currentMouseX: number,
+        @arg("clientY") currentMouseY: number
     ) {
         if ( !this.target ) {
             return;
         }
 
-        const x = mouseX - this.desktopPosition.left - this.itemOffset.x;
-        const y = mouseY - this.desktopPosition.top - this.itemOffset.y;
+        const desktop = this.model;
+        const mouseDeltaX = currentMouseX - this.startMousePosition.x;
+        const mouseDeltaY = currentMouseY - this.startMousePosition.y;
+
+        let x = this.startItemPosition.x + mouseDeltaX;
+        x = fixBounds(x, desktop.rect.width, this.target.width);
+
+        let y = this.startItemPosition.y + mouseDeltaY;
+        y = fixBounds(y, desktop.rect.height, this.target.height);
         
         this.target.setPosition(x, y);
     }
@@ -57,4 +61,18 @@ export class DragController extends Controller<DesktopModel> {
     onDrop() {
         this.target = undefined;
     }
+}
+
+function fixBounds(
+    coordinate: number, 
+    desktopSize: number,
+    itemSize: number
+): number {
+    coordinate = Math.max(0, coordinate);
+    coordinate = Math.min(
+        coordinate,
+        desktopSize - itemSize
+    );
+
+    return coordinate;
 }

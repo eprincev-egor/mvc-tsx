@@ -34,6 +34,19 @@ export class ItemView extends View<ItemModel> {
         }
     }
 
+    componentDidMount() {
+        super.componentDidMount();
+
+        const itemEl = ReactDOM.findDOMNode(this) as Element;
+        const itemRect = itemEl.getBoundingClientRect();
+
+        const itemModel = this.model;
+        itemModel.set({
+            width: itemRect.width,
+            height: itemRect.height
+        });
+    }
+
     className() {
         const item = this.model;
         const classes = ["Item"];

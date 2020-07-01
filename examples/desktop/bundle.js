@@ -122,6 +122,12 @@ const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 class DesktopModel extends mvc_tsx_1.Model {
     constructor(items) {
         super();
+        this.rect = {
+            left: 0,
+            top: 0,
+            width: 0,
+            height: 0
+        };
         this.items = [];
         this.items = items;
     }
@@ -149,12 +155,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DesktopView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
+const react_dom_1 = __importDefault(__webpack_require__("react-dom"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const ItemView_1 = __webpack_require__("./examples/desktop/desktop/item/ItemView.tsx");
 __webpack_require__("./examples/desktop/desktop/Desktop.css");
 class DesktopView extends mvc_tsx_1.View {
     template(desktop) {
         return (react_1.default.createElement("div", { className: "Desktop" }, desktop.items.map(item => react_1.default.createElement(ItemView_1.ItemView, { model: item, key: item.id }))));
+    }
+    componentDidMount() {
+        super.componentDidMount();
+        const desktopEl = react_dom_1.default.findDOMNode(this);
+        const desktopRect = desktopEl.getBoundingClientRect();
+        const desktopModel = this.model;
+        desktopModel.set({
+            rect: {
+                left: desktopRect.left,
+                top: desktopRect.top,
+                width: desktopRect.width,
+                height: desktopRect.height
+            }
+        });
     }
 }
 exports.DesktopView = DesktopView;
@@ -191,33 +212,37 @@ const item_1 = __webpack_require__("./examples/desktop/desktop/item/index.ts");
 let DragController = class DragController extends mvc_tsx_1.Controller {
     constructor() {
         super(...arguments);
-        this.desktopPosition = {
-            left: 0,
-            top: 0
+        this.startItemPosition = {
+            x: 0,
+            y: 0
         };
-        this.itemOffset = {
+        this.startMousePosition = {
             x: 0,
             y: 0
         };
     }
-    onDragStart(item, target, mouseX, mouseY) {
-        const rect = target.getBoundingClientRect();
+    onDragStart(item, mouseX, mouseY) {
         this.target = item;
-        this.desktopPosition = {
-            left: rect.left,
-            top: rect.top
+        this.startMousePosition = {
+            x: mouseX,
+            y: mouseY
         };
-        this.itemOffset = {
-            x: mouseX - rect.left - item.x,
-            y: mouseY - rect.top - item.y
+        this.startItemPosition = {
+            x: item.x,
+            y: item.y
         };
     }
-    onMove(mouseX, mouseY) {
+    onMove(currentMouseX, currentMouseY) {
         if (!this.target) {
             return;
         }
-        const x = mouseX - this.desktopPosition.left - this.itemOffset.x;
-        const y = mouseY - this.desktopPosition.top - this.itemOffset.y;
+        const desktop = this.model;
+        const mouseDeltaX = currentMouseX - this.startMousePosition.x;
+        const mouseDeltaY = currentMouseY - this.startMousePosition.y;
+        let x = this.startItemPosition.x + mouseDeltaX;
+        x = fixBounds(x, desktop.rect.width, this.target.width);
+        let y = this.startItemPosition.y + mouseDeltaY;
+        y = fixBounds(y, desktop.rect.height, this.target.height);
         this.target.setPosition(x, y);
     }
     onDrop() {
@@ -227,11 +252,10 @@ let DragController = class DragController extends mvc_tsx_1.Controller {
 __decorate([
     mvc_tsx_1.on("mousedown", DesktopView_1.DesktopView.ui.item),
     __param(0, mvc_tsx_1.arg(item_1.ItemModel)),
-    __param(1, mvc_tsx_1.arg("target")),
-    __param(2, mvc_tsx_1.arg("clientX")),
-    __param(3, mvc_tsx_1.arg("clientY")),
+    __param(1, mvc_tsx_1.arg("clientX")),
+    __param(2, mvc_tsx_1.arg("clientY")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [item_1.ItemModel, Object, Number, Number]),
+    __metadata("design:paramtypes", [item_1.ItemModel, Number, Number]),
     __metadata("design:returntype", void 0)
 ], DragController.prototype, "onDragStart", null);
 __decorate([
@@ -252,6 +276,11 @@ DragController = __decorate([
     mvc_tsx_1.forView(DesktopView_1.DesktopView)
 ], DragController);
 exports.DragController = DragController;
+function fixBounds(coordinate, desktopSize, itemSize) {
+    coordinate = Math.max(0, coordinate);
+    coordinate = Math.min(coordinate, desktopSize - itemSize);
+    return coordinate;
+}
 
 
 /***/ }),
@@ -433,6 +462,8 @@ class ItemModel extends mvc_tsx_1.Model {
         this.id = ++uid;
         this.x = 0;
         this.y = 0;
+        this.width = 0;
+        this.height = 0;
         this.name = "";
         this.selected = false;
         this.editing = false;
@@ -497,6 +528,16 @@ class ItemView extends mvc_tsx_1.View {
                 inputEl.focus();
             }
         }
+    }
+    componentDidMount() {
+        super.componentDidMount();
+        const itemEl = react_dom_1.default.findDOMNode(this);
+        const itemRect = itemEl.getBoundingClientRect();
+        const itemModel = this.model;
+        itemModel.set({
+            width: itemRect.width,
+            height: itemRect.height
+        });
     }
     className() {
         const item = this.model;

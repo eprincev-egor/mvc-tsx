@@ -6,6 +6,8 @@ export class ItemModel extends Model {
     id: number = ++uid;
     x: number = 0;
     y: number = 0;
+    width: number = 0;
+    height: number = 0;
     name: string = "";
     selected: boolean = false;
     editing: boolean = false;

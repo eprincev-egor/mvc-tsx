@@ -2,7 +2,6 @@ import { Controller, forView, on, arg } from "mvc-tsx";
 import { DesktopModel } from "../DesktopModel";
 import { DesktopView } from "../DesktopView";
 import { ItemModel } from "../item";
-import { IElement } from "./IElement";
 
 @forView(DesktopView)
 export class DropController extends Controller<DesktopModel> {
@@ -47,4 +46,13 @@ export class DropController extends Controller<DesktopModel> {
         const desktop = this.model;
         desktop.add(items);
     }
+}
+
+
+// for tests
+export interface IElement {
+    getBoundingClientRect(): {
+        left: number;
+        top: number;
+    };
 }

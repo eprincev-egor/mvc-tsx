@@ -29202,22 +29202,26 @@ class DOMListener {
         return thisIsValidTarget;
     }
     getHandlerArgs(event) {
-        const args = this.handlerArgs.map((eventPropertyPath) => this.getEventArg(eventPropertyPath));
+        const args = this.handlerArgs.map((eventPropertyPath) => this.getHandlerArgument(event, eventPropertyPath));
         return args;
     }
-    getEventArg(eventPropertyPath) {
+    getHandlerArgument(event, eventPropertyPath) {
         if (typeof eventPropertyPath === "function") {
             const ModelConstructor = eventPropertyPath;
-            const model = getNearestModelByEvent_1.getNearestModelByEvent(event, ModelConstructor);
-            if (!model) {
-                throw new Error("cannot find model: " + ModelConstructor.name);
-            }
+            const model = this.getHandlerArgumentByModel(event, ModelConstructor);
             return model;
         }
         else {
             const argValue = getPropertyFromEvent_1.getPropertyFromEvent(event, eventPropertyPath);
             return argValue;
         }
+    }
+    getHandlerArgumentByModel(event, ModelConstructor) {
+        const model = getNearestModelByEvent_1.getNearestModelByEvent(event, ModelConstructor);
+        if (!model) {
+            throw new Error("cannot find model: " + ModelConstructor.name);
+        }
+        return model;
     }
 }
 exports.DOMListener = DOMListener;

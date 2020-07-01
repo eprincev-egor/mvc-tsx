@@ -1,4 +1,5 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { View } from "mvc-tsx";
 import { DesktopModel } from "./DesktopModel";
 import { ItemView } from "./item/ItemView";
@@ -19,5 +20,22 @@ export class DesktopView extends View<DesktopModel> {
                 )}
             </div>
         );
+    }
+
+    componentDidMount() {
+        super.componentDidMount();
+
+        const desktopEl = ReactDOM.findDOMNode(this) as Element;
+        const desktopRect = desktopEl.getBoundingClientRect();
+
+        const desktopModel = this.model;
+        desktopModel.set({
+            rect: {
+                left: desktopRect.left,
+                top: desktopRect.top,
+                width: desktopRect.width,
+                height: desktopRect.height
+            }
+        });
     }
 }
