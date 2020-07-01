@@ -682,7 +682,7 @@ describe("Controller", () => {
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button some", selector should be just className like are ".some-class"`
+            err.message === `invalid selector ".button some", selector should be just className like are ".some-class" or "window"`
         );
 
 
@@ -695,7 +695,7 @@ describe("Controller", () => {
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button>some", selector should be just className like are ".some-class"`
+            err.message === `invalid selector ".button>some", selector should be just className like are ".some-class" or "window"`
         );
 
         assert.throws(() => {
@@ -707,7 +707,7 @@ describe("Controller", () => {
                 }
             }
         }, err =>
-            err.message === `invalid selector ".button,.x", selector should be just className like are ".some-class"`
+            err.message === `invalid selector ".button,.x", selector should be just className like are ".some-class" or "window"`
         );
     });
 
@@ -1005,4 +1005,37 @@ describe("Controller", () => {
     });
 
 
+    it("listen window events", () => {
+        class MyModel extends Model {
+            counter: number = 0;
+        }
+
+        class MyView extends View<MyModel> {
+            template(model: MyModel) {
+                return <div></div>
+            }
+        }
+
+        let actualMouseX: number = 0;
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("mousemove", "window")
+            onMouseMove(@arg("clientX") mouseX: number) {
+                actualMouseX = mouseX;
+            }
+
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const mouseEvent = new window.Event("mousemove", {bubbles: true});
+        (mouseEvent as any).clientX = 10;
+
+        window.dispatchEvent(mouseEvent);
+        assert.strictEqual(actualMouseX, 10);
+    });
 });

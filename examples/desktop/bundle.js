@@ -259,7 +259,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], DragController.prototype, "onDragStart", null);
 __decorate([
-    mvc_tsx_1.on("mousemove", DesktopView_1.DesktopView.ui.desktop),
+    mvc_tsx_1.on("mousemove", "window"),
     __param(0, mvc_tsx_1.arg("clientX")),
     __param(1, mvc_tsx_1.arg("clientY")),
     __metadata("design:type", Function),
@@ -267,7 +267,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], DragController.prototype, "onMove", null);
 __decorate([
-    mvc_tsx_1.on("mouseup", DesktopView_1.DesktopView.ui.desktop),
+    mvc_tsx_1.on("mouseup", "window"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)

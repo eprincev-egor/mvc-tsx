@@ -29177,10 +29177,10 @@ class DOMListener {
         this.domHandler = (event) => {
             this.onDOMEvent(event);
         };
-        document.addEventListener(this.realEventType, this.domHandler);
+        window.addEventListener(this.realEventType, this.domHandler);
     }
     destroy() {
-        document.removeEventListener(this.realEventType, this.domHandler);
+        window.removeEventListener(this.realEventType, this.domHandler);
         delete this.view;
         delete this.handler;
         delete this.domHandler;
@@ -29273,8 +29273,11 @@ function on(eventTypeOrModel, selectorOrModelEventType) {
         eventType = eventTypeOrModel;
         selector = selectorOrModelEventType;
         const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-        if (!selectorIsJustClassName) {
-            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
+        const selectorIsWindow = selector === "window";
+        const isValidSelector = (selectorIsJustClassName ||
+            selectorIsWindow);
+        if (!isValidSelector) {
+            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
         }
     }
     else {
@@ -29720,6 +29723,9 @@ exports.getPropertyFromEvent = getPropertyFromEvent;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidTarget = void 0;
 function isValidTarget(params) {
+    if (params.selector === "window") {
+        return true;
+    }
     let parent = params.target;
     let insideComponent = false;
     let insideSelector = false;

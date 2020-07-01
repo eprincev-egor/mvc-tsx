@@ -34,11 +34,11 @@ export class DOMListener {
         this.domHandler = (event: Event) => {
             this.onDOMEvent(event);
         };
-        document.addEventListener(this.realEventType, this.domHandler);
+        window.addEventListener(this.realEventType, this.domHandler);
     }
 
     destroy() {
-        document.removeEventListener(this.realEventType, this.domHandler);
+        window.removeEventListener(this.realEventType, this.domHandler);
         delete this.view;
         delete this.handler;
         delete this.domHandler;

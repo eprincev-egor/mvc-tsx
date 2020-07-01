@@ -58,9 +58,14 @@ export function on(
         selector = selectorOrModelEventType;
 
         const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+        const selectorIsWindow = selector === "window";
+        const isValidSelector = (
+            selectorIsJustClassName ||
+            selectorIsWindow
+        );
 
-        if ( !selectorIsJustClassName ) {
-            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class"`);
+        if ( !isValidSelector ) {
+            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
         }
     }
     else {

@@ -35,7 +35,7 @@ export class DragController extends Controller<DesktopModel> {
         };
     }
 
-    @on("mousemove", DesktopView.ui.desktop)
+    @on("mousemove", "window")
     onMove(
         @arg("clientX") currentMouseX: number,
         @arg("clientY") currentMouseY: number
@@ -57,7 +57,7 @@ export class DragController extends Controller<DesktopModel> {
         this.target.setPosition(x, y);
     }
 
-    @on("mouseup", DesktopView.ui.desktop)
+    @on("mouseup", "window")
     onDrop() {
         this.target = undefined;
     }

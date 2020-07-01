@@ -4,6 +4,11 @@ export function isValidTarget(params: {
     selector: string;
     target: Element;
 }): boolean {
+
+    if ( params.selector === "window" ) {
+        return true;
+    }
+
     let parent: Element | null = params.target;
     let insideComponent = false;
     let insideSelector = false;
