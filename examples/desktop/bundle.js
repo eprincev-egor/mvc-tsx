@@ -311,10 +311,10 @@ let DropController = class DropController extends mvc_tsx_1.Controller {
     onDragEvents(preventDefault) {
         preventDefault();
     }
-    onDropFiles(desktopEl, files, clientX, clientY) {
-        const rect = desktopEl.getBoundingClientRect();
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+    onDropFiles(files, mouseX, mouseY) {
+        const desktop = this.model;
+        const x = mouseX - desktop.rect.left;
+        const y = mouseY - desktop.rect.top;
         const items = [];
         for (const file of files) {
             const item = new item_1.ItemModel({
@@ -324,7 +324,6 @@ let DropController = class DropController extends mvc_tsx_1.Controller {
             });
             items.push(item);
         }
-        const desktop = this.model;
         desktop.add(items);
     }
 };
@@ -343,12 +342,11 @@ __decorate([
 ], DropController.prototype, "onDragEvents", null);
 __decorate([
     mvc_tsx_1.on("drop", DesktopView_1.DesktopView.ui.desktop),
-    __param(0, mvc_tsx_1.arg("target")),
-    __param(1, mvc_tsx_1.arg("dataTransfer", "files")),
-    __param(2, mvc_tsx_1.arg("clientX")),
-    __param(3, mvc_tsx_1.arg("clientY")),
+    __param(0, mvc_tsx_1.arg("dataTransfer", "files")),
+    __param(1, mvc_tsx_1.arg("clientX")),
+    __param(2, mvc_tsx_1.arg("clientY")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, FileList, Number, Number]),
+    __metadata("design:paramtypes", [FileList, Number, Number]),
     __metadata("design:returntype", void 0)
 ], DropController.prototype, "onDropFiles", null);
 DropController = __decorate([

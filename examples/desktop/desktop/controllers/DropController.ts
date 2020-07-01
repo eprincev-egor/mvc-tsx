@@ -21,16 +21,14 @@ export class DropController extends Controller<DesktopModel> {
     
     @on("drop", DesktopView.ui.desktop)
     onDropFiles(
-        @arg("target") desktopEl: IElement,
-        
         @arg("dataTransfer", "files" as any) files: FileList,
-        @arg("clientX") clientX: number,
-        @arg("clientY") clientY: number
+        @arg("clientX") mouseX: number,
+        @arg("clientY") mouseY: number
     ) {
-        const rect = desktopEl.getBoundingClientRect();
+        const desktop = this.model;
 
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+        const x = mouseX - desktop.rect.left;
+        const y = mouseY - desktop.rect.top;
 
         const items: ItemModel[] = [];
         for (const file of files) {
@@ -43,16 +41,6 @@ export class DropController extends Controller<DesktopModel> {
             items.push(item);
         }
 
-        const desktop = this.model;
         desktop.add(items);
     }
-}
-
-
-// for tests
-export interface IElement {
-    getBoundingClientRect(): {
-        left: number;
-        top: number;
-    };
 }
