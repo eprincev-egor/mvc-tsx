@@ -1,4 +1,4 @@
-import { Controller, on, arg, forView } from "mvc-tsx";
+import { Controller, on, event, forView } from "mvc-tsx";
 import { RootModel } from "../RootModel";
 import { ProductModel } from "../../product";
 import { ProductView } from "../../product";
@@ -11,7 +11,7 @@ export class AddToCartController extends Controller<RootModel> {
     @on("click", ProductView.ui.addToCart)
     onClickAddToCart(
         // and get nearest Model from event
-        @arg(ProductModel) product: ProductModel
+        @event(ProductModel) product: ProductModel
     ) {
         // call cart business logic
         this.model.cart.addProduct(product);

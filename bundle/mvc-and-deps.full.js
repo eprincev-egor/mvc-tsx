@@ -29245,7 +29245,7 @@ function fixFocusAndBlur(eventType) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.forView = exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.arg = exports.on = void 0;
+exports.forView = exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.event = exports.on = void 0;
 const mvcEvents_1 = __webpack_require__("./lib/mvcEvents.ts");
 const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
 ;
@@ -29298,7 +29298,7 @@ function on(eventTypeOrModel, selectorOrModelEventType) {
 }
 exports.on = on;
 /**
- * Get some value from event object
+ * Get some value from event object or get nearest model from components
  * ```ts
  * class MyController extends Controller<MyModel> {
  *
@@ -29306,10 +29306,18 @@ exports.on = on;
  *     onChangeInput(
  *         // get changed input value:
  *         // event.target.value
- *         *@arg("target", "value") inputValue: string
+ *         *@event("target", "value") inputValue: string
  *     ) {
  *         // some action
  *     }
+ *
+ *     *@on("click", MyView.ui.childView)
+ *      onClickChild(
+ *         // get model from nearest view by event target
+ *         *@event(ChildModel) child: ChildModel
+ *      ) {
+ *         // some action
+ *      }
  *
  * }
  * ```
@@ -29317,7 +29325,7 @@ exports.on = on;
  * @param secondKey keyof Event[firstKey], next step in property path.
  * @param otherPropertyPath other keys
  */
-function arg(firstKey, secondKey, ...otherPropertyPath) {
+function event(firstKey, secondKey, ...otherPropertyPath) {
     return (target, methodName, argumentIndex) => {
         if (!target._handlersArguments) {
             target._handlersArguments = [];
@@ -29346,7 +29354,7 @@ function arg(firstKey, secondKey, ...otherPropertyPath) {
         target._handlersArguments.push(handlerArgs);
     };
 }
-exports.arg = arg;
+exports.event = event;
 function getListeners(controller) {
     const proto = controller.constructor.prototype;
     const listenersMeta = (proto._listenersMeta || []);
@@ -29612,7 +29620,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.forView = exports.arg = exports.on = exports.Controller = exports.View = exports.Model = exports.EventEmitter = exports.ReactDOM = exports.React = void 0;
+exports.forView = exports.event = exports.on = exports.Controller = exports.View = exports.Model = exports.EventEmitter = exports.ReactDOM = exports.React = void 0;
 const React = __importStar(__webpack_require__("./deps/react.js"));
 exports.React = React;
 const ReactDOM = __importStar(__webpack_require__("./deps/react-dom.js"));
@@ -29621,7 +29629,7 @@ const events_1 = __webpack_require__("./deps/events.js");
 Object.defineProperty(exports, "EventEmitter", { enumerable: true, get: function () { return events_1.EventEmitter; } });
 const Meta_1 = __webpack_require__("./lib/Meta.ts");
 Object.defineProperty(exports, "on", { enumerable: true, get: function () { return Meta_1.on; } });
-Object.defineProperty(exports, "arg", { enumerable: true, get: function () { return Meta_1.arg; } });
+Object.defineProperty(exports, "event", { enumerable: true, get: function () { return Meta_1.event; } });
 Object.defineProperty(exports, "forView", { enumerable: true, get: function () { return Meta_1.forView; } });
 const Model_1 = __webpack_require__("./lib/Model.ts");
 Object.defineProperty(exports, "Model", { enumerable: true, get: function () { return Model_1.Model; } });
@@ -29639,7 +29647,7 @@ if (typeof window !== "undefined") {
         View: View_1.View,
         Controller: Controller_1.Controller,
         on: Meta_1.on,
-        arg: Meta_1.arg,
+        event: Meta_1.event,
         forView: Meta_1.forView
     };
     if (!windowObj.React) {

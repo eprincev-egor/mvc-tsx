@@ -1,4 +1,4 @@
-import { Controller, forView, on, arg } from "mvc-tsx";
+import { Controller, forView, on, event } from "mvc-tsx";
 import { DesktopModel } from "../DesktopModel";
 import { DesktopView } from "../DesktopView";
 import { ItemModel } from "../item";
@@ -14,16 +14,16 @@ export class DropController extends Controller<DesktopModel> {
     @on("dragenter", DesktopView.ui.desktop)
     @on("dragleave", DesktopView.ui.desktop)
     onDragEvents(
-        @arg("preventDefault") preventDefault: () => void
+        @event("preventDefault") preventDefault: () => void
     ) {
         preventDefault();
     }
     
     @on("drop", DesktopView.ui.desktop)
     onDropFiles(
-        @arg("dataTransfer", "files" as any) files: FileList,
-        @arg("clientX") mouseX: number,
-        @arg("clientY") mouseY: number
+        @event("dataTransfer", "files" as any) files: FileList,
+        @event("clientX") mouseX: number,
+        @event("clientY") mouseY: number
     ) {
         const desktop = this.model;
 

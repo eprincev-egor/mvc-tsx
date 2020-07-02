@@ -6,7 +6,7 @@ With MVC-TSX you can write imperative code for creating reactive applications.
 ```tsx
 import React from "react";
 import * as ReactDOM from "react-dom";
-import {Model, View, Controller, on, arg} from "mvc-tsx";
+import {Model, View, Controller, on, event} from "mvc-tsx";
 
 // define Model
 class LoginModel extends Model {
@@ -21,6 +21,8 @@ class LoginView extends View<LoginModel> {
     static ui = {
         loginInput: ".Login--loginInput",
         passInput: ".Login--passInput",
+        // ctrl + click on key "loginButton"
+        // can jump to method onClickLogin
         loginButton: ".Login--loginBtn"
     };
 
@@ -39,14 +41,14 @@ class LoginView extends View<LoginModel> {
 class LoginController extends Controller<LoginModel> {
 
     @on("change", LoginView.ui.loginInput)
-    onChangeLogin( @arg("target", "value") inputValue: string ) {
+    onChangeLogin( @event("target", "value") inputValue: string ) {
         this.model.set({
             login: inputValue
         });
     }
 
     @on("change", LoginView.ui.passInput)
-    onChangePassword( @arg("target", "value") inputValue: string ) {
+    onChangePassword( @event("target", "value") inputValue: string ) {
         this.model.set({
             password: inputValue
         });

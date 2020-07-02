@@ -389,8 +389,8 @@ let AddTodoController = class AddTodoController extends mvc_tsx_1.Controller {
 };
 __decorate([
     mvc_tsx_1.on("keyup", AppView_1.AppView.ui.addTodo),
-    __param(0, mvc_tsx_1.arg("keyCode")),
-    __param(1, mvc_tsx_1.arg("target")),
+    __param(0, mvc_tsx_1.event("keyCode")),
+    __param(1, mvc_tsx_1.event("target")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", void 0)
@@ -568,7 +568,7 @@ let RemoveTodoController = class RemoveTodoController extends mvc_tsx_1.Controll
 };
 __decorate([
     mvc_tsx_1.on("click", todo_1.TodoView.ui.remove),
-    __param(0, mvc_tsx_1.arg(TodoModel_1.TodoModel)),
+    __param(0, mvc_tsx_1.event(TodoModel_1.TodoModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [TodoModel_1.TodoModel]),
     __metadata("design:returntype", void 0)
@@ -663,7 +663,7 @@ let ToggleAllTodosStatusController = class ToggleAllTodosStatusController extend
 };
 __decorate([
     mvc_tsx_1.on("change", AppView_1.AppView.ui.toggleAllStatus),
-    __param(0, mvc_tsx_1.arg("target", "checked")),
+    __param(0, mvc_tsx_1.event("target", "checked")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Boolean]),
     __metadata("design:returntype", void 0)
@@ -910,15 +910,15 @@ let EditNameController = class EditNameController extends mvc_tsx_1.Controller {
 };
 __decorate([
     mvc_tsx_1.on("dblclick", TodoView_1.TodoView.ui.startEdit),
-    __param(0, mvc_tsx_1.arg("target")),
+    __param(0, mvc_tsx_1.event("target")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [HTMLDivElement]),
     __metadata("design:returntype", void 0)
 ], EditNameController.prototype, "onStartEdit", null);
 __decorate([
     mvc_tsx_1.on("keyup", TodoView_1.TodoView.ui.nameInput),
-    __param(0, mvc_tsx_1.arg("keyCode")),
-    __param(1, mvc_tsx_1.arg("target", "value")),
+    __param(0, mvc_tsx_1.event("keyCode")),
+    __param(1, mvc_tsx_1.event("target", "value")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", void 0)

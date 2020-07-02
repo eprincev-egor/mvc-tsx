@@ -1,4 +1,4 @@
-import { Controller, on, arg, forView } from "mvc-tsx";
+import { Controller, on, event, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
 import { ENTER_KEY_CODE } from "../keyCodes";
 import { AppView } from "../AppView";
@@ -12,8 +12,8 @@ export class AddTodoController extends Controller<AppModel> {
 
     @on("keyup", AppView.ui.addTodo)
     onKeyupInput(
-        @arg("keyCode") keyCode: number,
-        @arg("target") input: IInput
+        @event("keyCode") keyCode: number,
+        @event("target") input: IInput
     ) {
         if ( keyCode === ENTER_KEY_CODE ) {
             this.onPressEnter(input);

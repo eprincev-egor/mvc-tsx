@@ -251,17 +251,17 @@ let DragController = class DragController extends mvc_tsx_1.Controller {
 };
 __decorate([
     mvc_tsx_1.on("mousedown", DesktopView_1.DesktopView.ui.item),
-    __param(0, mvc_tsx_1.arg(item_1.ItemModel)),
-    __param(1, mvc_tsx_1.arg("clientX")),
-    __param(2, mvc_tsx_1.arg("clientY")),
+    __param(0, mvc_tsx_1.event(item_1.ItemModel)),
+    __param(1, mvc_tsx_1.event("clientX")),
+    __param(2, mvc_tsx_1.event("clientY")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [item_1.ItemModel, Number, Number]),
     __metadata("design:returntype", void 0)
 ], DragController.prototype, "onDragStart", null);
 __decorate([
     mvc_tsx_1.on("mousemove", "window"),
-    __param(0, mvc_tsx_1.arg("clientX")),
-    __param(1, mvc_tsx_1.arg("clientY")),
+    __param(0, mvc_tsx_1.event("clientX")),
+    __param(1, mvc_tsx_1.event("clientY")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Number]),
     __metadata("design:returntype", void 0)
@@ -335,16 +335,16 @@ __decorate([
     mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView.ui.desktop),
     mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView.ui.desktop),
     mvc_tsx_1.on("dragleave", DesktopView_1.DesktopView.ui.desktop),
-    __param(0, mvc_tsx_1.arg("preventDefault")),
+    __param(0, mvc_tsx_1.event("preventDefault")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Function]),
     __metadata("design:returntype", void 0)
 ], DropController.prototype, "onDragEvents", null);
 __decorate([
     mvc_tsx_1.on("drop", DesktopView_1.DesktopView.ui.desktop),
-    __param(0, mvc_tsx_1.arg("dataTransfer", "files")),
-    __param(1, mvc_tsx_1.arg("clientX")),
-    __param(2, mvc_tsx_1.arg("clientY")),
+    __param(0, mvc_tsx_1.event("dataTransfer", "files")),
+    __param(1, mvc_tsx_1.event("clientX")),
+    __param(2, mvc_tsx_1.event("clientY")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [FileList, Number, Number]),
     __metadata("design:returntype", void 0)
@@ -386,7 +386,7 @@ let SelectController = class SelectController extends mvc_tsx_1.Controller {
 };
 __decorate([
     mvc_tsx_1.on("click", DesktopView_1.DesktopView.ui.item),
-    __param(0, mvc_tsx_1.arg(item_1.ItemModel)),
+    __param(0, mvc_tsx_1.event(item_1.ItemModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [item_1.ItemModel]),
     __metadata("design:returntype", void 0)
@@ -620,8 +620,8 @@ __decorate([
 ], EditNameController.prototype, "onStartEdit", null);
 __decorate([
     mvc_tsx_1.on("keyup", ItemView_1.ItemView.ui.nameInput),
-    __param(0, mvc_tsx_1.arg("keyCode")),
-    __param(1, mvc_tsx_1.arg("target", "value")),
+    __param(0, mvc_tsx_1.event("keyCode")),
+    __param(1, mvc_tsx_1.event("target", "value")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", void 0)

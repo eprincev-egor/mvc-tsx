@@ -3,7 +3,7 @@ import { render, unmountComponentAtNode } from "react-dom";
 import { JSDOM } from "jsdom";
 import { act } from "react-dom/test-utils";
 import assert from "assert";
-import { Controller, View, Model, on, arg, forView } from "../lib";
+import { Controller, View, Model, on, event, forView } from "../lib";
 import { DOMListener } from "../lib/DOMListener";
 
 describe("Controller", () => {
@@ -168,7 +168,7 @@ describe("Controller", () => {
         class MyController extends Controller<MyModel> {
 
             @on("change", MyView.ui.input)
-            onChangeInput(@arg("target", "value") inputValue: string) {
+            onChangeInput(@event("target", "value") inputValue: string) {
                 this.model.set({
                     name: inputValue
                 });
@@ -244,7 +244,7 @@ describe("Controller", () => {
         class MyController extends Controller<UsersCollection> {
 
             @on("click", UserView.ui.user)
-            onClickUser(@arg(UserModel) user: UserModel) {
+            onClickUser(@event(UserModel) user: UserModel) {
                 this.model.set({
                     clicked: user
                 });
@@ -308,8 +308,8 @@ describe("Controller", () => {
 
             @on("mousemove", MyView.ui.area)
             onChangeInput(
-                @arg("clientX") x: number,
-                @arg("clientY") y: number
+                @event("clientX") x: number,
+                @event("clientY") y: number
             ) {
                 this.model.set({
                     x,
@@ -436,7 +436,7 @@ describe("Controller", () => {
         assert.strictEqual(clicksEl.textContent, "2");
     });
 
-    it("using @arg() with long property path", () => {
+    it("using @event() with long property path", () => {
         class MyModel extends Model {
             parentClassName: string = "";
         }
@@ -464,7 +464,7 @@ describe("Controller", () => {
 
             @on("click", MyView.ui.button)
             onClickButton(
-                @arg("target", "parentNode", "className") 
+                @event("target", "parentNode", "className") 
                 parentClassName: string
             ) {
                 this.model.set({
@@ -514,7 +514,7 @@ describe("Controller", () => {
         class MyController extends Controller<MyModel> {
             /* istanbul ignore next */
             @on("click", MyView.ui.some)
-            onClickButton(@arg(UnknownModel) model: UnknownModel) {
+            onClickButton(@event(UnknownModel) model: UnknownModel) {
                 hasCall = true;
             }
         }
@@ -949,7 +949,7 @@ describe("Controller", () => {
             }
 
             onChangeInput(
-                @arg("target") input: IInput
+                @event("target") input: IInput
             ) {
                 const value = input.value;
                 const isValid = value && value.trim();
@@ -1021,7 +1021,7 @@ describe("Controller", () => {
         class MyController extends Controller<MyModel> {
 
             @on("mousemove", "window")
-            onMouseMove(@arg("clientX") mouseX: number) {
+            onMouseMove(@event("clientX") mouseX: number) {
                 actualMouseX = mouseX;
             }
 

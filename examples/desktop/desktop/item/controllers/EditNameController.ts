@@ -1,4 +1,4 @@
-import { Controller, forView, on, arg } from "mvc-tsx";
+import { Controller, forView, on, event } from "mvc-tsx";
 import { ItemModel } from "../ItemModel";
 import { ItemView } from "../ItemView";
 
@@ -17,8 +17,8 @@ export class EditNameController extends Controller<ItemModel> {
     
     @on("keyup", ItemView.ui.nameInput)
     onKeyupEditInput(
-        @arg("keyCode") keyCode: number,
-        @arg("target", "value") inputValue: string
+        @event("keyCode") keyCode: number,
+        @event("target", "value") inputValue: string
     ) {
         if ( keyCode === ENTER_KEY_CODE ) {
             this.onPressEnter(inputValue);

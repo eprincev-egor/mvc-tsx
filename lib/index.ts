@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import {EventEmitter} from "events";
 
-import {on, arg, forView} from "./Meta";
+import {on, event, forView} from "./Meta";
 import {Model} from "./Model";
 import {View} from "./View";
 import {Controller} from "./Controller";
@@ -15,7 +15,7 @@ export {
     View,
     Controller,
     on,
-    arg,
+    event,
     forView
 };
 
@@ -29,7 +29,7 @@ if ( typeof window !== "undefined" ) {
         View,
         Controller,
         on,
-        arg,
+        event,
         forView
     };
 

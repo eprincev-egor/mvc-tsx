@@ -298,14 +298,14 @@ let QuantityController = class QuantityController extends mvc_tsx_1.Controller {
 };
 __decorate([
     mvc_tsx_1.on("click", CartPositionView_1.CartPositionView.ui.incrementQuantity),
-    __param(0, mvc_tsx_1.arg(CartPositionModel_1.CartPositionModel)),
+    __param(0, mvc_tsx_1.event(CartPositionModel_1.CartPositionModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [CartPositionModel_1.CartPositionModel]),
     __metadata("design:returntype", void 0)
 ], QuantityController.prototype, "onClickIncrement", null);
 __decorate([
     mvc_tsx_1.on("click", CartPositionView_1.CartPositionView.ui.decrementQuantity),
-    __param(0, mvc_tsx_1.arg(CartPositionModel_1.CartPositionModel)),
+    __param(0, mvc_tsx_1.event(CartPositionModel_1.CartPositionModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [CartPositionModel_1.CartPositionModel]),
     __metadata("design:returntype", void 0)
@@ -695,7 +695,7 @@ let AddToCartController = class AddToCartController extends mvc_tsx_1.Controller
 };
 __decorate([
     mvc_tsx_1.on("click", product_2.ProductView.ui.addToCart),
-    __param(0, mvc_tsx_1.arg(product_1.ProductModel)),
+    __param(0, mvc_tsx_1.event(product_1.ProductModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [product_1.ProductModel]),
     __metadata("design:returntype", void 0)

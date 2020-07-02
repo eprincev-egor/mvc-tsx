@@ -1,4 +1,4 @@
-import { Controller, on, arg, forView } from "mvc-tsx";
+import { Controller, on, event, forView } from "mvc-tsx";
 import { AppModel } from "../AppModel";
 import { TodoModel } from "../todo/TodoModel";
 import { TodoView } from "../todo";
@@ -9,7 +9,7 @@ export class RemoveTodoController extends Controller<AppModel> {
     
     @on("click", TodoView.ui.remove)
     onClickRemove(
-        @arg(TodoModel) todo: TodoModel
+        @event(TodoModel) todo: TodoModel
     ) {
         const app = this.model;
         app.removeTodo(todo.id);

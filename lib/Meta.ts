@@ -95,7 +95,7 @@ type KeyOfDOMEvent = (
     keyof DragEvent
 )
 /**
- * Get some value from event object
+ * Get some value from event object or get nearest model from components
  * ```ts
  * class MyController extends Controller<MyModel> {
  * 
@@ -103,10 +103,18 @@ type KeyOfDOMEvent = (
  *     onChangeInput(
  *         // get changed input value:
  *         // event.target.value
- *         *@arg("target", "value") inputValue: string
+ *         *@event("target", "value") inputValue: string
  *     ) {
  *         // some action
  *     }
+ * 
+ *     *@on("click", MyView.ui.childView)
+ *      onClickChild(
+ *         // get model from nearest view by event target
+ *         *@event(ChildModel) child: ChildModel
+ *      ) {
+ *         // some action
+ *      }
  * 
  * }
  * ```
@@ -114,7 +122,7 @@ type KeyOfDOMEvent = (
  * @param secondKey keyof Event[firstKey], next step in property path.
  * @param otherPropertyPath other keys
  */
-export function arg<T extends KeyOfDOMEvent | (new (...args: any[]) => Model)>(
+export function event<T extends KeyOfDOMEvent | (new (...args: any[]) => Model)>(
     firstKey?: T,
     secondKey?: (
         T extends keyof Event ?

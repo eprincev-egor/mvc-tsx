@@ -1,4 +1,4 @@
-import { Controller, on, forView, arg } from "mvc-tsx";
+import { Controller, on, forView, event } from "mvc-tsx";
 import { DesktopModel } from "../DesktopModel";
 import { DesktopView } from "../DesktopView";
 import { ItemModel } from "../item";
@@ -8,7 +8,7 @@ export class SelectController extends Controller<DesktopModel> {
     
     @on("click", DesktopView.ui.item)
     onClickItem(
-        @arg(ItemModel) item: ItemModel
+        @event(ItemModel) item: ItemModel
     ) {
         item.select();
     }
