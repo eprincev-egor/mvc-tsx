@@ -108,6 +108,14 @@ type KeyOfDOMEvent = (
  *         // some action
  *     }
  * 
+ *     *@on("change", MyView.ui.input)
+ *     onChangeInput(
+ *         // get full event object:
+ *         *@event() e: Event
+ *     ) {
+ *         // some action
+ *     }
+ * 
  *     *@on("click", MyView.ui.childView)
  *      onClickChild(
  *         // get model from nearest view by event target
@@ -145,7 +153,10 @@ export function event<T extends KeyOfDOMEvent | (new (...args: any[]) => Model)>
             eventPropertyPath: []
         };
 
-        if ( typeof firstKey === "string" ) {
+        if ( !firstKey ) {
+            handlerArgs.eventPropertyPath = [];
+        }
+        else if ( typeof firstKey === "string" ) {
             const propertyPath: string[] = [
                 firstKey as string
             ];
@@ -262,12 +273,12 @@ export function forView<TModel extends Model>(
     CreateController?: TCreateController<TModel>
 ) {
     return (ControllerClass: TControllerConstructor<TModel>) => {
-        mvcEvents.on("initView", (event: {view: any, model: any}) => {
-            if ( !(event.view instanceof ViewConstructor) ) {
+        mvcEvents.on("initView", (domEvent: {view: any, model: any}) => {
+            if ( !(domEvent.view instanceof ViewConstructor) ) {
                 return;
             }
 
-            createControllersForView(event.view, event.model);
+            createControllersForView(domEvent.view, domEvent.model);
         });
 
         function createControllersForView(view: View<any>, model: TModel) {
@@ -298,8 +309,8 @@ export function forView<TModel extends Model>(
                 domListeners.push(domListener);
             }
 
-            mvcEvents.once("destroyView", (event: {view: View<any>}) => {
-                if ( event.view !== view ) {
+            mvcEvents.once("destroyView", (domEvent: {view: View<any>}) => {
+                if ( domEvent.view !== view ) {
                     return;
                 }
 

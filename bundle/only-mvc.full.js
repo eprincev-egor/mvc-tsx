@@ -343,6 +343,14 @@ exports.on = on;
  *         // some action
  *     }
  *
+ *     *@on("change", MyView.ui.input)
+ *     onChangeInput(
+ *         // get full event object:
+ *         *@event() e: Event
+ *     ) {
+ *         // some action
+ *     }
+ *
  *     *@on("click", MyView.ui.childView)
  *      onClickChild(
  *         // get model from nearest view by event target
@@ -367,7 +375,10 @@ function event(firstKey, secondKey, ...otherPropertyPath) {
             argumentIndex,
             eventPropertyPath: []
         };
-        if (typeof firstKey === "string") {
+        if (!firstKey) {
+            handlerArgs.eventPropertyPath = [];
+        }
+        else if (typeof firstKey === "string") {
             const propertyPath = [
                 firstKey
             ];
@@ -451,11 +462,11 @@ exports.isDomListener = isDomListener;
  */
 function forView(ViewConstructor, CreateController) {
     return (ControllerClass) => {
-        mvcEvents_1.mvcEvents.on("initView", (event) => {
-            if (!(event.view instanceof ViewConstructor)) {
+        mvcEvents_1.mvcEvents.on("initView", (domEvent) => {
+            if (!(domEvent.view instanceof ViewConstructor)) {
                 return;
             }
-            createControllersForView(event.view, event.model);
+            createControllersForView(domEvent.view, domEvent.model);
         });
         function createControllersForView(view, model) {
             const originalEmit = model.emit;
@@ -479,8 +490,8 @@ function forView(ViewConstructor, CreateController) {
                 domListener.listen();
                 domListeners.push(domListener);
             }
-            mvcEvents_1.mvcEvents.once("destroyView", (event) => {
-                if (event.view !== view) {
+            mvcEvents_1.mvcEvents.once("destroyView", (domEvent) => {
+                if (domEvent.view !== view) {
                     return;
                 }
                 for (const domListener of domListeners) {

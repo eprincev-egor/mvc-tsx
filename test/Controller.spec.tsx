@@ -1038,4 +1038,50 @@ describe("Controller", () => {
         window.dispatchEvent(mouseEvent);
         assert.strictEqual(actualMouseX, 10);
     });
+
+    it("get full event object", () => {
+        class MyModel extends Model {}
+
+        class MyView extends View<MyModel> {
+            static ui = {
+                button: ".button"
+            }
+
+            template(model: MyModel) {
+                return <div>
+                    <button className="button"></button>
+                </div>
+            }
+        }
+
+        let actualEvent: any = {};
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+            constructor(model: any) {
+                super(model);
+                console.log(1);
+            }
+
+            @on("click", MyView.ui.button)
+            onClickButton(@event() e: any) {
+                actualEvent = e;
+            }
+
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const buttonEl = document.querySelector(".button") as HTMLButtonElement;
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent);
+
+        assert.strictEqual(actualEvent.type, "click");
+        assert.strictEqual(actualEvent.target, buttonEl);
+        assert.ok(actualEvent instanceof window.Event);
+    });
+
 });
