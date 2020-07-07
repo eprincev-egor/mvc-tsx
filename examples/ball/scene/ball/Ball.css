@@ -1,0 +1,5 @@
+.Ball {
+    position: fixed;
+    border-radius: 100%;
+    cursor: pointer;
+}
