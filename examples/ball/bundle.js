@@ -404,6 +404,55 @@ function fixBounds(coordinate, sceneSize, ballDiameter) {
 
 /***/ }),
 
+/***/ "./examples/ball/scene/controllers/GravityController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GravityController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const __1 = __webpack_require__("./examples/ball/scene/index.ts");
+const SceneView_1 = __webpack_require__("./examples/ball/scene/SceneView.tsx");
+let GravityController = class GravityController extends mvc_tsx_1.Controller {
+    constructor(scene) {
+        super(scene);
+        this.createInterval();
+    }
+    createInterval() {
+        setInterval(() => {
+            this.processBallGravity();
+        }, 30);
+    }
+    processBallGravity() {
+        const scene = this.model;
+        const ball = scene.ball;
+        if (ball.captured) {
+            return;
+        }
+        const maxY = scene.height - ball.getDiameter();
+        const newY = Math.min(ball.y + 10, maxY);
+        ball.setPosition(ball.x, newY);
+    }
+};
+GravityController = __decorate([
+    mvc_tsx_1.forView(SceneView_1.SceneView),
+    __metadata("design:paramtypes", [__1.SceneModel])
+], GravityController);
+exports.GravityController = GravityController;
+
+
+/***/ }),
+
 /***/ "./examples/ball/scene/controllers/SceneSizeController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -452,7 +501,7 @@ exports.SceneSizeController = SceneSizeController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DragDropController = exports.SceneSizeController = exports.SceneView = exports.SceneModel = void 0;
+exports.GravityController = exports.DragDropController = exports.SceneSizeController = exports.SceneView = exports.SceneModel = void 0;
 const SceneModel_1 = __webpack_require__("./examples/ball/scene/SceneModel.ts");
 Object.defineProperty(exports, "SceneModel", { enumerable: true, get: function () { return SceneModel_1.SceneModel; } });
 const SceneView_1 = __webpack_require__("./examples/ball/scene/SceneView.tsx");
@@ -461,6 +510,8 @@ const SceneSizeController_1 = __webpack_require__("./examples/ball/scene/control
 Object.defineProperty(exports, "SceneSizeController", { enumerable: true, get: function () { return SceneSizeController_1.SceneSizeController; } });
 const DragDropController_1 = __webpack_require__("./examples/ball/scene/controllers/DragDropController.ts");
 Object.defineProperty(exports, "DragDropController", { enumerable: true, get: function () { return DragDropController_1.DragDropController; } });
+const GravityController_1 = __webpack_require__("./examples/ball/scene/controllers/GravityController.ts");
+Object.defineProperty(exports, "GravityController", { enumerable: true, get: function () { return GravityController_1.GravityController; } });
 
 
 /***/ }),

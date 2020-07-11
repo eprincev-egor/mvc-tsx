@@ -754,9 +754,12 @@ exports.getNearestModelByEvent = void 0;
 function getNearestModelByEvent(event, ModelConstructor) {
     let parent = event.target;
     while (parent) {
-        const model = parent._view.model;
-        if (model instanceof ModelConstructor) {
-            return model;
+        const view = parent._view;
+        if (view) {
+            const model = view.model;
+            if (model instanceof ModelConstructor) {
+                return model;
+            }
         }
         parent = parent.parentElement;
     }
