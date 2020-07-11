@@ -10,10 +10,6 @@ import { mvcEvents } from "./mvcEvents";
 export abstract class View<TModel extends Model> extends React.Component<{model: TModel}> {
     model!: TModel;
 
-    static ui: {
-        [elementName: string]: string
-    } = {};
-
     /**
      * HTML Template.
      * Should be function who returns React template

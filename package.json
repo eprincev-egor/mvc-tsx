@@ -1,6 +1,6 @@
 {
   "name": "mvc-tsx",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "MVC based on React",
   "main": "bundle/mvc-and-deps.min.js",
   "types": "lib/index.ts",

@@ -29626,7 +29626,6 @@ class View extends React.Component {
     }
 }
 exports.View = View;
-View.ui = {};
 
 
 /***/ }),
