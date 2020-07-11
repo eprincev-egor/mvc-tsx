@@ -4,11 +4,16 @@ export function getNearestModelByEvent(event: any, ModelConstructor: new () => M
     let parent: Element | null = event.target;
 
     while ( parent ) {
-        const model = (parent as any)._view.model;
+        const view = (parent as any)._view;
         
-        if ( model instanceof ModelConstructor ) {
-            return model;
+        if ( view ) {
+            const model = view.model;
+        
+            if ( model instanceof ModelConstructor ) {
+                return model;
+            }    
         }
+        
 
         parent = parent.parentElement;
     }
