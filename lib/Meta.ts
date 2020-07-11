@@ -2,7 +2,6 @@ import { Model } from "./Model";
 import { Controller } from "./Controller";
 import { View } from "./View";import { mvcEvents } from "./mvcEvents";
 import { DOMListener } from "./DOMListener";
-;
 
 type TModelConstructor = new(...args: any[]) => Model;
 
@@ -14,7 +13,7 @@ export interface IHandlerArgs {
 
 export interface IListenerMeta {
     eventType: string;
-    selector: string | TModelConstructor;
+    selector: string | TModelConstructor | TViewConstructor<any>;
     methodName?: string;
     handler?: (...args: any[]) => void;
     handlerArgs?: HandlerArg[]; 
@@ -24,7 +23,7 @@ export type HandlerArg = string[] | TModelConstructor;
 
 export interface IListener {
     eventType: string;
-    selector: string | TModelConstructor;
+    selector: string | TModelConstructor | TViewConstructor<any>;
     handlerArgs: HandlerArg[];
     handler: (...args: any[]) => void;
 }
@@ -43,33 +42,45 @@ export interface IListener {
  * }
  * ```
  * @param eventTypeOrModel any DOM Event type or Model constructor
- * @param selectorOrModelEventType selector like are: ".my-class" or model eventType  
+ * @param selectorOrViewOrModelEventType selector like are: ".my-class" or model eventType  
  * Selectors like are ".a .b .c" does not supported.
  */
 export function on(
     eventTypeOrModel: keyof HTMLElementEventMap | TModelConstructor, 
-    selectorOrModelEventType: string
+    selectorOrViewOrModelEventType: string | TViewConstructor<any>
 ) {
     let eventType!: string;
-    let selector!: string | TModelConstructor;
+    let selector!: string | TModelConstructor | TViewConstructor<any>;
+
+    const isInvalidCall = (
+        typeof eventTypeOrModel === "function" &&
+        typeof selectorOrViewOrModelEventType === "function"
+    );
+    if ( isInvalidCall ) {
+        throw new Error("invalid call, first argument and second cannot be a function at the same time");
+    }
+
 
     if ( typeof eventTypeOrModel === "string" ) {
         eventType = eventTypeOrModel;
-        selector = selectorOrModelEventType;
+        selector = selectorOrViewOrModelEventType;
 
-        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-        const selectorIsWindow = selector === "window";
-        const isValidSelector = (
-            selectorIsJustClassName ||
-            selectorIsWindow
-        );
-
-        if ( !isValidSelector ) {
-            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
+        if ( typeof selector === "string" ) {
+        
+            const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+            const selectorIsWindow = selector === "window";
+            const isValidSelector = (
+                selectorIsJustClassName ||
+                selectorIsWindow
+            );
+    
+            if ( !isValidSelector ) {
+                throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
+            }
         }
     }
     else {
-        eventType = selectorOrModelEventType;
+        eventType = selectorOrViewOrModelEventType as string;
         selector = eventTypeOrModel;
     }
 
@@ -239,7 +250,8 @@ export function findHandlerArguments(controller: Controller<any>, methodName: st
 
 export function isModelListener(listener: IListener) {
     return (
-        typeof listener.selector !== "string"
+        typeof listener.selector === "function" &&
+        listener.selector.prototype instanceof Model
     );
 }
 
@@ -299,7 +311,7 @@ export function forView<TModel extends Model>(
             for (const meta of domListenersMeta) {
                 const domListener = new DOMListener({
                     eventType: meta.eventType as keyof HTMLElementEventMap,
-                    selector: meta.selector as string,
+                    selector: meta.selector as string | TViewConstructor<any>,
                     handlerArgs: meta.handlerArgs,
                     handler: meta.handler,
                     view

@@ -219,13 +219,14 @@ class DOMListener {
         delete this.handlerArgs;
     }
     onDOMEvent(event) {
-        if (this.isValidEvent(event)) {
-            const args = this.getHandlerArgs(event);
+        const componentEl = ReactDOM.findDOMNode(this.view);
+        if (this.isValidEvent(event, componentEl)) {
+            const currentTarget = this.getCurrentTarget(event, componentEl);
+            const args = this.getHandlerArgs(event, currentTarget);
             this.handler(...args);
         }
     }
-    isValidEvent(event) {
-        const componentEl = ReactDOM.findDOMNode(this.view);
+    isValidEvent(event, componentEl) {
         const thisIsValidTarget = isValidTarget_1.isValidTarget({
             componentEl,
             selector: this.selector,
@@ -233,18 +234,18 @@ class DOMListener {
         });
         return thisIsValidTarget;
     }
-    getHandlerArgs(event) {
-        const args = this.handlerArgs.map((eventPropertyPath) => this.getHandlerArgument(event, eventPropertyPath));
+    getHandlerArgs(event, currentTarget) {
+        const args = this.handlerArgs.map((eventPropertyPath) => this.getHandlerArgument(event, currentTarget, eventPropertyPath));
         return args;
     }
-    getHandlerArgument(event, eventPropertyPath) {
+    getHandlerArgument(event, currentTarget, eventPropertyPath) {
         if (typeof eventPropertyPath === "function") {
             const ModelConstructor = eventPropertyPath;
             const model = this.getHandlerArgumentByModel(event, ModelConstructor);
             return model;
         }
         else {
-            const argValue = getPropertyFromEvent_1.getPropertyFromEvent(event, eventPropertyPath);
+            const argValue = getPropertyFromEvent_1.getPropertyFromEvent(event, currentTarget, eventPropertyPath);
             return argValue;
         }
     }
@@ -254,6 +255,22 @@ class DOMListener {
             throw new Error("cannot find model: " + ModelConstructor.name);
         }
         return model;
+    }
+    getCurrentTarget(event, componentEl) {
+        if (typeof this.selector === "function") {
+            const currentTarget = componentEl;
+            return currentTarget;
+        }
+        let elem = event.target;
+        const currentTargetClassName = this.selector.slice(1);
+        while (elem) {
+            const isCurrentTarget = (elem.classList &&
+                elem.classList.contains(currentTargetClassName));
+            if (isCurrentTarget) {
+                return elem;
+            }
+            elem = elem.parentNode;
+        }
     }
 }
 exports.DOMListener = DOMListener;
@@ -278,9 +295,9 @@ function fixFocusAndBlur(eventType) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.forView = exports.isDomListener = exports.isModelListener = exports.findHandlerArguments = exports.getListeners = exports.event = exports.on = void 0;
+const Model_1 = __webpack_require__("./lib/Model.ts");
 const mvcEvents_1 = __webpack_require__("./lib/mvcEvents.ts");
 const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
-;
 /**
  * Attach handler to View DOM events like are click, or model events.
  * ```js
@@ -295,25 +312,32 @@ const DOMListener_1 = __webpack_require__("./lib/DOMListener.ts");
  * }
  * ```
  * @param eventTypeOrModel any DOM Event type or Model constructor
- * @param selectorOrModelEventType selector like are: ".my-class" or model eventType
+ * @param selectorOrViewOrModelEventType selector like are: ".my-class" or model eventType
  * Selectors like are ".a .b .c" does not supported.
  */
-function on(eventTypeOrModel, selectorOrModelEventType) {
+function on(eventTypeOrModel, selectorOrViewOrModelEventType) {
     let eventType;
     let selector;
+    const isInvalidCall = (typeof eventTypeOrModel === "function" &&
+        typeof selectorOrViewOrModelEventType === "function");
+    if (isInvalidCall) {
+        throw new Error("invalid call, first argument and second cannot be a function at the same time");
+    }
     if (typeof eventTypeOrModel === "string") {
         eventType = eventTypeOrModel;
-        selector = selectorOrModelEventType;
-        const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
-        const selectorIsWindow = selector === "window";
-        const isValidSelector = (selectorIsJustClassName ||
-            selectorIsWindow);
-        if (!isValidSelector) {
-            throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
+        selector = selectorOrViewOrModelEventType;
+        if (typeof selector === "string") {
+            const selectorIsJustClassName = /^\.[\w-]+$/.test(selector);
+            const selectorIsWindow = selector === "window";
+            const isValidSelector = (selectorIsJustClassName ||
+                selectorIsWindow);
+            if (!isValidSelector) {
+                throw new Error(`invalid selector "${selector}", selector should be just className like are ".some-class" or "window"`);
+            }
         }
     }
     else {
-        eventType = selectorOrModelEventType;
+        eventType = selectorOrViewOrModelEventType;
         selector = eventTypeOrModel;
     }
     return (target, methodName, descriptor) => {
@@ -436,7 +460,8 @@ function findHandlerArguments(controller, methodName) {
 }
 exports.findHandlerArguments = findHandlerArguments;
 function isModelListener(listener) {
-    return (typeof listener.selector !== "string");
+    return (typeof listener.selector === "function" &&
+        listener.selector.prototype instanceof Model_1.Model);
 }
 exports.isModelListener = isModelListener;
 function isDomListener(listener) {
@@ -612,7 +637,7 @@ class View extends React.Component {
     }
     componentDidMount() {
         const rootEl = ReactDOM.findDOMNode(this);
-        rootEl._model = this.model;
+        rootEl._view = this;
     }
     componentWillUnmount() {
         // clear memory leaks
@@ -622,7 +647,7 @@ class View extends React.Component {
             model: this.model
         });
         const rootEl = ReactDOM.findDOMNode(this);
-        delete rootEl._model;
+        delete rootEl._view;
     }
     /**
      * Detach listeners and fix any memory leaks.
@@ -730,7 +755,7 @@ exports.getNearestModelByEvent = void 0;
 function getNearestModelByEvent(event, ModelConstructor) {
     let parent = event.target;
     while (parent) {
-        const model = parent._model;
+        const model = parent._view.model;
         if (model instanceof ModelConstructor) {
             return model;
         }
@@ -750,11 +775,14 @@ exports.getNearestModelByEvent = getNearestModelByEvent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPropertyFromEvent = void 0;
-function getPropertyFromEvent(event, propertyPath) {
+function getPropertyFromEvent(event, currentTarget, propertyPath) {
     let eventPropertyValue = event;
     for (const key of propertyPath) {
         let nextValue = eventPropertyValue[key];
-        if (typeof nextValue === "function") {
+        if (key === "currentTarget") {
+            nextValue = currentTarget;
+        }
+        else if (typeof nextValue === "function") {
             nextValue = nextValue.bind(eventPropertyValue);
         }
         eventPropertyValue = nextValue;
@@ -780,9 +808,17 @@ function isValidTarget(params) {
     let parent = params.target;
     let insideComponent = false;
     let insideSelector = false;
-    const selectorClassName = params.selector.replace(".", "");
+    let elemMatchesSelector;
+    if (typeof params.selector === "string") {
+        const selectorClassName = params.selector.replace(".", "");
+        elemMatchesSelector = (elem) => elem.classList.contains(selectorClassName);
+    }
+    else {
+        const ChildView = params.selector;
+        elemMatchesSelector = (elem) => elem._view instanceof ChildView;
+    }
     while (parent) {
-        if (parent.classList.contains(selectorClassName)) {
+        if (elemMatchesSelector(parent)) {
             insideSelector = true;
         }
         if (parent === params.componentEl) {

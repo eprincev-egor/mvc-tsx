@@ -5,9 +5,11 @@ import { isValidTarget } from "./utils/isValidTarget";
 import { getPropertyFromEvent } from "./utils/getPropertyFromEvent";
 import { getNearestModelByEvent } from "./utils/getNearestModelByEvent";
 
+type TViewConstructor<TModel extends Model> = new (...args: any[]) => View<TModel>;
+
 interface IDOMListenerParams {
     eventType: keyof HTMLElementEventMap;
-    selector: string;
+    selector: string | TViewConstructor<any>;
     handlerArgs: ( string[] | (new (...args: any[]) => Model))[];
     handler: (...args: any[]) => void,
     view: View<any>;
@@ -16,7 +18,7 @@ interface IDOMListenerParams {
 export class DOMListener {
     view: View<any>;
     private realEventType: keyof HTMLElementEventMap;
-    private selector: string;
+    private selector: string | TViewConstructor<any>;
     private handlerArgs: ( string[] | (new (...args: any[]) => Model))[];
     private handler: (...args: any[]) => void;
     private domHandler!: (...args: any[]) => void;
@@ -46,15 +48,16 @@ export class DOMListener {
     }
 
     private onDOMEvent(event: Event) {
-        if ( this.isValidEvent(event) ) {
-            const currentTarget = this.getCurrentTarget(event);
+        const componentEl = ReactDOM.findDOMNode(this.view) as any;
+
+        if ( this.isValidEvent(event, componentEl) ) {
+            const currentTarget = this.getCurrentTarget(event, componentEl);
             const args = this.getHandlerArgs(event, currentTarget);
             this.handler(...args);
         }
     }
 
-    private isValidEvent(event: Event): boolean {
-        const componentEl = ReactDOM.findDOMNode(this.view) as any;
+    private isValidEvent(event: Event, componentEl: HTMLElement): boolean {
 
         const thisIsValidTarget = isValidTarget({
             componentEl,
@@ -108,7 +111,12 @@ export class DOMListener {
         return model;
     }
 
-    private getCurrentTarget(event: Event): HTMLElement | undefined {
+    private getCurrentTarget(event: Event, componentEl: HTMLElement): HTMLElement | undefined {
+        if ( typeof this.selector === "function" ) {
+            const currentTarget = componentEl;
+            return currentTarget;
+        }
+
         let elem = event.target as HTMLElement | null;
         const currentTargetClassName = this.selector.slice(1);
 

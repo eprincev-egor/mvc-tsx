@@ -512,7 +512,7 @@ describe("Controller", () => {
         let hasCall = false;
         @forView(MyView)
         class MyController extends Controller<MyModel> {
-            /* istanbul ignore next */
+            // istanbul ignore next
             @on("click", MyView.ui.some)
             onClickButton(@event(UnknownModel) model: UnknownModel) {
                 hasCall = true;
@@ -675,7 +675,7 @@ describe("Controller", () => {
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
-                /* istanbul ignore next */
+                // istanbul ignore next
                 @on("click", ".button some")
                 onClickButton() {
                     // 
@@ -688,7 +688,7 @@ describe("Controller", () => {
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
-                /* istanbul ignore next */
+                // istanbul ignore next
                 @on("click", ".button>some")
                 onClickButton() {
                     // 
@@ -700,7 +700,7 @@ describe("Controller", () => {
 
         assert.throws(() => {
             class MyController extends Controller<MyModel> {
-                /* istanbul ignore next */
+                // istanbul ignore next
                 @on("click", ".button,.x")
                 onClickButton() {
                     // 
@@ -778,7 +778,7 @@ describe("Controller", () => {
         class MyModel extends Model {}
         class MyView extends View<MyModel> {
 
-            /* istanbul ignore next */
+            // istanbul ignore next
             template(model: MyModel) {
                 return <div></div>
             }
@@ -1057,16 +1057,11 @@ describe("Controller", () => {
         let actualEvent: any = {};
         @forView(MyView)
         class MyController extends Controller<MyModel> {
-            constructor(model: any) {
-                super(model);
-                console.log(1);
-            }
 
             @on("click", MyView.ui.button)
             onClickButton(@event() e: any) {
                 actualEvent = e;
             }
-
         }
 
         const testModel = new MyModel();
@@ -1173,4 +1168,135 @@ describe("Controller", () => {
         assert.strictEqual(actualCurrentTargetClassName, "x currentTarget y");
         assert.strictEqual(actualTargetClassName, "button");
     });
+
+    it("@on('click', SomeView)", () => {
+        class MyModel extends Model {}
+
+        class MyView extends View<MyModel> {
+            template(model: MyModel) {
+                return <div className="some-view"></div>
+            }
+        }
+
+
+        let actualTargetClassName!: string;
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("click", MyView)
+            onClickMyView(
+                @event("target", "className") targetClassName: string
+            ) {
+                actualTargetClassName = targetClassName;
+            }
+
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const viewEl = document.querySelector(".some-view") as HTMLButtonElement;
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        viewEl.dispatchEvent(clickEvent);
+
+        assert.strictEqual(actualTargetClassName, "some-view");
+    });
+
+    it("@on arguments cannot be only functions", () => {
+        class MyModel extends Model {}
+        class MyView extends View<MyModel> {
+            // istanbul ignore next
+            template() {
+                return <div></div>
+            }
+        }
+
+        assert.throws(() => {
+            class MyController extends Controller<MyModel> {
+                // istanbul ignore next
+                @on(MyModel, MyView)
+                onClickButton() {
+                    // 
+                }
+            }
+        }, err =>
+            err.message === `invalid call, first argument and second cannot be a function at the same time`
+        );
+    });
+
+
+    it("@on('click', ChildView)", () => {
+        class ChildModel extends Model {
+            name: string;
+
+            constructor(name: string) {
+                super();
+                this.name = name;
+            }
+        }
+
+        class ParentModel extends Model {
+            children: ChildModel[];
+            
+            constructor(children: ChildModel[]) {
+                super();
+                this.children = children;
+            }
+        }
+
+        class ChildView extends View<ChildModel> {
+            template(child: ChildModel) {
+                return <div className="child">{child.name}</div>
+            }
+        }
+
+        class ParentView extends View<ParentModel> {
+            template(parent: ParentModel) {
+                return <div className="parent">{
+                    parent.children.map(child =>
+                        <ChildView model={child}/>
+                    )
+                }</div>
+            }
+        }
+
+
+        let actualChildName!: string;
+
+        @forView(ParentView)
+        class ParentController extends Controller<ParentModel> {
+
+            @on("click", ChildView)
+            onClickMyView(
+                @event("target", "innerHTML") childName: string
+            ) {
+                actualChildName = childName;
+            }
+        }
+
+        const bob = new ChildModel("bob");
+        const oliver = new ChildModel("oliver");
+        const parent = new ParentModel([
+            bob, oliver
+        ]);
+
+        act(() => {
+            render(<ParentView model={parent}/>, container);
+        });
+
+        const [bobEl, oliverEl] = document.querySelectorAll(".child");
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        
+        bobEl.dispatchEvent(clickEvent);
+        assert.strictEqual(actualChildName, "bob");
+
+        oliverEl.dispatchEvent(clickEvent);
+        assert.strictEqual(actualChildName, "oliver");
+    });
+
 });

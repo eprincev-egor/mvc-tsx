@@ -45,7 +45,7 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
 
     componentDidMount() {
         const rootEl = ReactDOM.findDOMNode(this) as any;
-        rootEl._model = this.model;
+        rootEl._view = this;
     }
 
     componentWillUnmount() {
@@ -59,7 +59,7 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         });
 
         const rootEl = ReactDOM.findDOMNode(this) as any;
-        delete rootEl._model;
+        delete rootEl._view;
     }
 
     /**
