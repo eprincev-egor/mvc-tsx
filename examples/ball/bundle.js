@@ -235,6 +235,22 @@ class BallModel extends mvc_tsx_1.Model {
         this.radius = 30;
         this.x = 0;
         this.y = 0;
+        this.captured = false;
+    }
+    setCapture(newCapturedState) {
+        const ball = this;
+        ball.set({
+            captured: newCapturedState
+        });
+    }
+    setPosition(x, y) {
+        const ball = this;
+        ball.set({
+            x, y
+        });
+    }
+    getDiameter() {
+        return this.radius * 2;
     }
 }
 exports.BallModel = BallModel;
@@ -282,6 +298,108 @@ const BallModel_1 = __webpack_require__("./examples/ball/scene/ball/BallModel.ts
 Object.defineProperty(exports, "BallModel", { enumerable: true, get: function () { return BallModel_1.BallModel; } });
 const BallView_1 = __webpack_require__("./examples/ball/scene/ball/BallView.tsx");
 Object.defineProperty(exports, "BallView", { enumerable: true, get: function () { return BallView_1.BallView; } });
+
+
+/***/ }),
+
+/***/ "./examples/ball/scene/controllers/DragDropController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DragDropController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const SceneView_1 = __webpack_require__("./examples/ball/scene/SceneView.tsx");
+const ball_1 = __webpack_require__("./examples/ball/scene/ball/index.ts");
+let DragDropController = class DragDropController extends mvc_tsx_1.Controller {
+    constructor() {
+        super(...arguments);
+        this.startBallPosition = {
+            x: 0,
+            y: 0
+        };
+        this.startMousePosition = {
+            x: 0,
+            y: 0
+        };
+    }
+    onDragStart(mouseX, mouseY) {
+        this.startMousePosition = {
+            x: mouseX,
+            y: mouseY
+        };
+        const scene = this.model;
+        const ball = scene.ball;
+        this.startBallPosition = {
+            x: ball.x,
+            y: ball.y
+        };
+        ball.setCapture(true);
+    }
+    onMove(currentMouseX, currentMouseY) {
+        const scene = this.model;
+        const ball = scene.ball;
+        if (!ball.captured) {
+            return;
+        }
+        const mouseDeltaX = currentMouseX - this.startMousePosition.x;
+        const mouseDeltaY = currentMouseY - this.startMousePosition.y;
+        let x = this.startBallPosition.x + mouseDeltaX;
+        x = fixBounds(x, scene.width, ball.getDiameter());
+        let y = this.startBallPosition.y + mouseDeltaY;
+        y = fixBounds(y, scene.height, ball.getDiameter());
+        ball.setPosition(x, y);
+    }
+    onDrop() {
+        const scene = this.model;
+        const ball = scene.ball;
+        ball.setCapture(false);
+    }
+};
+__decorate([
+    mvc_tsx_1.on("mousedown", ball_1.BallView),
+    __param(0, mvc_tsx_1.event("clientX")),
+    __param(1, mvc_tsx_1.event("clientY")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:returntype", void 0)
+], DragDropController.prototype, "onDragStart", null);
+__decorate([
+    mvc_tsx_1.on("mousemove", "window"),
+    __param(0, mvc_tsx_1.event("clientX")),
+    __param(1, mvc_tsx_1.event("clientY")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number]),
+    __metadata("design:returntype", void 0)
+], DragDropController.prototype, "onMove", null);
+__decorate([
+    mvc_tsx_1.on("mouseup", "window"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], DragDropController.prototype, "onDrop", null);
+DragDropController = __decorate([
+    mvc_tsx_1.forView(SceneView_1.SceneView)
+], DragDropController);
+exports.DragDropController = DragDropController;
+function fixBounds(coordinate, sceneSize, ballDiameter) {
+    coordinate = Math.max(0, coordinate);
+    coordinate = Math.min(coordinate, sceneSize - ballDiameter);
+    return coordinate;
+}
 
 
 /***/ }),
@@ -334,13 +452,15 @@ exports.SceneSizeController = SceneSizeController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SceneSizeController = exports.SceneView = exports.SceneModel = void 0;
+exports.DragDropController = exports.SceneSizeController = exports.SceneView = exports.SceneModel = void 0;
 const SceneModel_1 = __webpack_require__("./examples/ball/scene/SceneModel.ts");
 Object.defineProperty(exports, "SceneModel", { enumerable: true, get: function () { return SceneModel_1.SceneModel; } });
 const SceneView_1 = __webpack_require__("./examples/ball/scene/SceneView.tsx");
 Object.defineProperty(exports, "SceneView", { enumerable: true, get: function () { return SceneView_1.SceneView; } });
 const SceneSizeController_1 = __webpack_require__("./examples/ball/scene/controllers/SceneSizeController.ts");
 Object.defineProperty(exports, "SceneSizeController", { enumerable: true, get: function () { return SceneSizeController_1.SceneSizeController; } });
+const DragDropController_1 = __webpack_require__("./examples/ball/scene/controllers/DragDropController.ts");
+Object.defineProperty(exports, "DragDropController", { enumerable: true, get: function () { return DragDropController_1.DragDropController; } });
 
 
 /***/ }),

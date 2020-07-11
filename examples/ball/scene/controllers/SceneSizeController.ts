@@ -13,6 +13,6 @@ export class SceneSizeController extends Controller<SceneModel> {
         scene.set({
             width: document.body.offsetWidth,
             height: document.body.offsetHeight
-        })
+        });
     }
 }
