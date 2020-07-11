@@ -7,11 +7,6 @@ import "./Desktop.css";
 
 export class DesktopView extends View<DesktopModel> {
 
-    static ui = {
-        desktop: ".Desktop",
-        item: ".Item"
-    };
-
     template(desktop: DesktopModel) {
         return (
             <div className="Desktop">

@@ -179,10 +179,6 @@ class DesktopView extends mvc_tsx_1.View {
     }
 }
 exports.DesktopView = DesktopView;
-DesktopView.ui = {
-    desktop: ".Desktop",
-    item: ".Item"
-};
 
 
 /***/ }),
@@ -250,7 +246,7 @@ let DragController = class DragController extends mvc_tsx_1.Controller {
     }
 };
 __decorate([
-    mvc_tsx_1.on("mousedown", DesktopView_1.DesktopView.ui.item),
+    mvc_tsx_1.on("mousedown", item_1.ItemView),
     __param(0, mvc_tsx_1.event(item_1.ItemModel)),
     __param(1, mvc_tsx_1.event("clientX")),
     __param(2, mvc_tsx_1.event("clientY")),
@@ -328,20 +324,20 @@ let DropController = class DropController extends mvc_tsx_1.Controller {
     }
 };
 __decorate([
-    mvc_tsx_1.on("drop", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragstart", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragend", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragover", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView.ui.desktop),
-    mvc_tsx_1.on("dragleave", DesktopView_1.DesktopView.ui.desktop),
+    mvc_tsx_1.on("drop", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragstart", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragend", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragover", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragenter", DesktopView_1.DesktopView),
+    mvc_tsx_1.on("dragleave", DesktopView_1.DesktopView),
     __param(0, mvc_tsx_1.event("preventDefault")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Function]),
     __metadata("design:returntype", void 0)
 ], DropController.prototype, "onDragEvents", null);
 __decorate([
-    mvc_tsx_1.on("drop", DesktopView_1.DesktopView.ui.desktop),
+    mvc_tsx_1.on("drop", DesktopView_1.DesktopView),
     __param(0, mvc_tsx_1.event("dataTransfer", "files")),
     __param(1, mvc_tsx_1.event("clientX")),
     __param(2, mvc_tsx_1.event("clientY")),
@@ -385,7 +381,7 @@ let SelectController = class SelectController extends mvc_tsx_1.Controller {
     }
 };
 __decorate([
-    mvc_tsx_1.on("click", DesktopView_1.DesktopView.ui.item),
+    mvc_tsx_1.on("click", item_1.ItemView),
     __param(0, mvc_tsx_1.event(item_1.ItemModel)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [item_1.ItemModel]),

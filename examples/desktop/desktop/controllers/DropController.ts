@@ -6,20 +6,20 @@ import { ItemModel } from "../item";
 @forView(DesktopView)
 export class DropController extends Controller<DesktopModel> {
 
-    @on("drop", DesktopView.ui.desktop)
-    @on("dragstart", DesktopView.ui.desktop)
-    @on("dragend", DesktopView.ui.desktop)
-    @on("dragover", DesktopView.ui.desktop)
-    @on("dragenter", DesktopView.ui.desktop)
-    @on("dragenter", DesktopView.ui.desktop)
-    @on("dragleave", DesktopView.ui.desktop)
+    @on("drop", DesktopView)
+    @on("dragstart", DesktopView)
+    @on("dragend", DesktopView)
+    @on("dragover", DesktopView)
+    @on("dragenter", DesktopView)
+    @on("dragenter", DesktopView)
+    @on("dragleave", DesktopView)
     onDragEvents(
         @event("preventDefault") preventDefault: () => void
     ) {
         preventDefault();
     }
     
-    @on("drop", DesktopView.ui.desktop)
+    @on("drop", DesktopView)
     onDropFiles(
         @event("dataTransfer", "files" as any) files: FileList,
         @event("clientX") mouseX: number,

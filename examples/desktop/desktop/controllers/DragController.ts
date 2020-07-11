@@ -1,7 +1,7 @@
 import { Controller, on, forView, event } from "mvc-tsx";
 import { DesktopModel } from "../DesktopModel";
 import { DesktopView } from "../DesktopView";
-import { ItemModel } from "../item";
+import { ItemModel, ItemView } from "../item";
 
 @forView(DesktopView)
 export class DragController extends Controller<DesktopModel> {
@@ -17,7 +17,7 @@ export class DragController extends Controller<DesktopModel> {
     };
 
 
-    @on("mousedown", DesktopView.ui.item)
+    @on("mousedown", ItemView)
     onDragStart(
         @event(ItemModel) item: ItemModel,
         @event("clientX") mouseX: number,
