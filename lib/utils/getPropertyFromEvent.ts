@@ -1,11 +1,18 @@
 
-export function getPropertyFromEvent(event: any, propertyPath: string[]) {
+export function getPropertyFromEvent(
+    event: any, 
+    currentTarget: any,
+    propertyPath: string[]
+) {
     let eventPropertyValue: any = event;
 
     for (const key of propertyPath) {
         let nextValue = eventPropertyValue[ key ];
 
-        if ( typeof nextValue === "function" ) {
+        if ( key === "currentTarget" ) {
+            nextValue = currentTarget;
+        }
+        else if ( typeof nextValue === "function" ) {
             nextValue = nextValue.bind(eventPropertyValue);
         }
         

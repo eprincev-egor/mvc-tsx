@@ -1084,4 +1084,93 @@ describe("Controller", () => {
         assert.ok(actualEvent instanceof window.Event);
     });
 
+    it("check event.currentTarget", () => {
+        class MyModel extends Model {}
+
+        class MyView extends View<MyModel> {
+            static ui = {
+                currentTarget: ".currentTarget"
+            }
+
+            template(model: MyModel) {
+                return <div className="currentTarget">
+                    <button className="button"></button>
+                </div>
+            }
+        }
+
+        let actualCurrentTargetClassName!: string;
+        let actualTargetClassName!: string;
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("click", MyView.ui.currentTarget)
+            onClickButton(
+                @event("currentTarget", "className") currentTargetClassName: string,
+                @event("target", "className") targetClassName: string
+            ) {
+                actualCurrentTargetClassName = currentTargetClassName;
+                actualTargetClassName = targetClassName;
+            }
+
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const buttonEl = document.querySelector(".button") as HTMLButtonElement;
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent);
+
+        assert.strictEqual(actualCurrentTargetClassName, "currentTarget");
+        assert.strictEqual(actualTargetClassName, "button");
+    });
+
+    it("check event.currentTarget with many classes", () => {
+        class MyModel extends Model {}
+
+        class MyView extends View<MyModel> {
+            static ui = {
+                currentTarget: ".currentTarget"
+            }
+
+            template(model: MyModel) {
+                return <div className="x currentTarget y">
+                    <button className="button"></button>
+                </div>
+            }
+        }
+
+        let actualCurrentTargetClassName!: string;
+        let actualTargetClassName!: string;
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("click", MyView.ui.currentTarget)
+            onClickButton(
+                @event("currentTarget", "className") currentTargetClassName: string,
+                @event("target", "className") targetClassName: string
+            ) {
+                actualCurrentTargetClassName = currentTargetClassName;
+                actualTargetClassName = targetClassName;
+            }
+
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const buttonEl = document.querySelector(".button") as HTMLButtonElement;
+
+        const clickEvent = new window.Event("click", {bubbles: true});
+        buttonEl.dispatchEvent(clickEvent);
+
+        assert.strictEqual(actualCurrentTargetClassName, "x currentTarget y");
+        assert.strictEqual(actualTargetClassName, "button");
+    });
 });

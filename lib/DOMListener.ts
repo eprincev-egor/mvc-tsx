@@ -47,7 +47,8 @@ export class DOMListener {
 
     private onDOMEvent(event: Event) {
         if ( this.isValidEvent(event) ) {
-            const args = this.getHandlerArgs(event);
+            const currentTarget = this.getCurrentTarget(event);
+            const args = this.getHandlerArgs(event, currentTarget);
             this.handler(...args);
         }
     }
@@ -64,9 +65,13 @@ export class DOMListener {
         return thisIsValidTarget;
     }
 
-    private getHandlerArgs(event: Event) {
+    private getHandlerArgs(event: Event, currentTarget: HTMLElement | undefined) {
         const args: any[] = this.handlerArgs.map((eventPropertyPath) => 
-            this.getHandlerArgument(event, eventPropertyPath) 
+            this.getHandlerArgument(
+                event, 
+                currentTarget, 
+                eventPropertyPath
+            ) 
         );
 
         return args;
@@ -74,6 +79,7 @@ export class DOMListener {
 
     private getHandlerArgument(
         event: Event, 
+        currentTarget: HTMLElement | undefined,
         eventPropertyPath: string[] | (new (...args: any[]) => Model)
     ) {
         if ( typeof eventPropertyPath === "function" ) {
@@ -82,7 +88,11 @@ export class DOMListener {
             return model;
         }
         else {
-            const argValue = getPropertyFromEvent(event, eventPropertyPath);
+            const argValue = getPropertyFromEvent(
+                event,
+                currentTarget,
+                eventPropertyPath
+            );
             return argValue;
         }
     }
@@ -96,6 +106,23 @@ export class DOMListener {
             throw new Error("cannot find model: " + ModelConstructor.name);
         }
         return model;
+    }
+
+    private getCurrentTarget(event: Event): HTMLElement | undefined {
+        let elem = event.target as HTMLElement | null;
+        const currentTargetClassName = this.selector.slice(1);
+
+        while ( elem ) {
+            const isCurrentTarget = (
+                elem.classList &&
+                elem.classList.contains(currentTargetClassName)
+            );
+            if ( isCurrentTarget ) {
+                return elem;
+            }
+
+            elem = elem.parentNode as HTMLElement;
+        }
     }
 }
 
