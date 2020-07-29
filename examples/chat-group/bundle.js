@@ -686,11 +686,14 @@ exports.FilesService = FilesService;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const utils_1 = __webpack_require__("./examples/chat-group/server/utils.ts");
-const test_users_1 = __webpack_require__("./examples/chat-group/server/test-users.ts");
+const testUsers_1 = __webpack_require__("./examples/chat-group/server/testUsers.ts");
 class UsersService {
+    constructor() {
+        this.users = testUsers_1.testUsers;
+    }
     async findUsers(searchPhrase) {
         await utils_1.sleepRandomTime();
-        let users = test_users_1.getTestUsers();
+        let users = this.users;
         if (searchPhrase) {
             const lowerSearchPhrase = searchPhrase.toLowerCase();
             users = users.filter(user => {
@@ -699,99 +702,125 @@ class UsersService {
                 return containsSearchPhrase;
             });
         }
+        users = users.map(user => cloneUser(user));
         return users;
     }
     async listenUserEvents(eventType, handler) {
-        const testUsers = test_users_1.getTestUsers();
         while (true) {
             await utils_1.sleepRandomTime();
             const randomDate = utils_1.getRandomDateNearNow();
-            const randomUser = utils_1.getRandomArrayElement(testUsers);
+            const randomUser = utils_1.getRandomArrayElement(this.users);
+            if (eventType === "login") {
+                const lastLogin = randomUser.lastLogin;
+                const newLastLogin = calculateNewMaxDate(lastLogin, randomDate);
+                randomUser.lastLogin = newLastLogin;
+            }
+            else {
+                const lastLogout = randomUser.lastLogout;
+                const newLastLogout = calculateNewMaxDate(lastLogout, randomDate);
+                randomUser.lastLogout = newLastLogout;
+            }
             handler(randomUser.id, randomDate);
         }
     }
 }
 exports.UsersService = UsersService;
+function calculateNewMaxDate(lastDate, newDate) {
+    if (!lastDate) {
+        return newDate;
+    }
+    if (lastDate > newDate) {
+        return lastDate;
+    }
+    return newDate;
+}
+function cloneUser(sourceUser) {
+    const userClone = {
+        ...sourceUser
+    };
+    if (sourceUser.avatar) {
+        userClone.avatar = {
+            ...sourceUser.avatar
+        };
+    }
+    return userClone;
+}
 
 
 /***/ }),
 
-/***/ "./examples/chat-group/server/test-users.ts":
+/***/ "./examples/chat-group/server/testUsers.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTestUsers = void 0;
-function getTestUsers() {
-    const users = [
-        {
-            id: "1",
-            name: "Стэнли Кубрик",
-            avatar: {
-                url: "images/stan.jpg"
-            },
-            lastLogin: new Date(1990, 2, 7),
-            lastLogout: new Date(1999, 2, 7)
+exports.testUsers = void 0;
+exports.testUsers = [
+    {
+        id: "1",
+        name: "Стэнли Кубрик",
+        avatar: {
+            url: "images/stan.jpg"
         },
-        {
-            id: "2",
-            name: "Джеффри Ансуорт",
-            avatar: {
-                url: "images/unsworth.jpg"
-            },
-            lastLogin: new Date(1970, 2, 7),
-            lastLogout: new Date(1978, 9, 28)
+        lastLogin: new Date(1990, 2, 7),
+        lastLogout: new Date(1999, 2, 7)
+    },
+    {
+        id: "2",
+        name: "Джеффри Ансуорт",
+        avatar: {
+            url: "images/unsworth.jpg"
         },
-        {
-            id: "3",
-            name: "Кир Дуллеа",
-            avatar: {
-                url: "images/keir.jpg"
-            },
-            lastLogin: new Date(1960, 0, 1)
+        lastLogin: new Date(1970, 2, 7),
+        lastLogout: new Date(1978, 9, 28)
+    },
+    {
+        id: "3",
+        name: "Кир Дуллеа",
+        avatar: {
+            url: "images/keir.jpg"
         },
-        {
-            id: "4",
-            name: "Хезер Даунхэм",
-            avatar: {
-                url: "images/downham.jpg"
-            },
-            lastLogin: new Date(1960, 0, 1)
+        lastLogin: new Date(1960, 0, 1)
+    },
+    {
+        id: "4",
+        name: "Хезер Даунхэм",
+        avatar: {
+            url: "images/downham.jpg"
         },
-        {
-            id: "5",
-            name: "Маргарет Тайзэк",
-            avatar: {
-                url: "images/margaret.jpg"
-            },
-            lastLogin: new Date(1960, 0, 1),
-            lastLogout: new Date(2011, 5, 25)
+        lastLogin: new Date(1960, 0, 1)
+    },
+    {
+        id: "5",
+        name: "Маргарет Тайзэк",
+        avatar: {
+            url: "images/margaret.jpg"
         },
-        {
-            id: "6",
-            name: "Уильям Сильвестр",
-            lastLogin: new Date(1960, 0, 1)
-        },
-        {
-            id: "7",
-            name: "Дэниэл Риктер",
-            lastLogin: new Date(1960, 0, 1)
-        },
-        {
-            id: "8",
-            name: "Леонард Росситер",
-            lastLogin: new Date(1960, 0, 1)
-        },
-        {
-            id: "9",
-            name: "Роберт Битти",
-            lastLogin: new Date(1960, 0, 1)
-        }
-    ];
-    return users;
-}
-exports.getTestUsers = getTestUsers;
+        lastLogin: new Date(1960, 0, 1),
+        lastLogout: new Date(2011, 5, 25)
+    },
+    {
+        id: "6",
+        name: "Уильям Сильвестр",
+        lastLogin: new Date(1960, 0, 1)
+    },
+    {
+        id: "7",
+        name: "Дэниэл Риктер",
+        lastLogin: new Date(1960, 0, 1)
+    },
+    {
+        id: "8",
+        name: "Леонард Росситер",
+        lastLogin: new Date(1960, 0, 1)
+    },
+    {
+        id: "9",
+        name: "Роберт Битти",
+        lastLogin: new Date(1960, 0, 1)
+    }
+];
 
 
 /***/ }),
