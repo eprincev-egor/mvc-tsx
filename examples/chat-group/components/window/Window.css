@@ -1,0 +1,72 @@
+
+.Window {
+    position: absolute;
+    width: 320px;
+    left: 50%;
+    margin-left: -160px;
+    top: 20px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.6);
+    border-style: solid;
+    border-width: 3px;
+    border-color: #4c6e93;
+    box-sizing: border-box;
+    height: 600px;
+}
+
+.Window--content {
+	height: calc( 100% - 20px );
+}
+
+.Window--head {
+    width: 100%;
+    background: #4c6e93;
+    color: white;
+    font-size: 12px;
+    font-family: arial;
+    height: 20px;
+}
+
+.Window--title {
+    display: inline-block;
+    font-family: arial;
+}
+
+.Window--title:before {
+    font-size: 14px;
+    display: inline-block;
+    padding: 2px;
+    padding-right: 5px;
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+}
+
+.Window--buttons {
+    float: right;
+    font-size: 14px;
+}
+
+.Window--minimizeButton {
+    position: relative;
+}
+
+.Window--minimizeButton:before {
+    position: relative;
+    top: 4px;
+}
+
+.Window--helpButton {
+    font-size: 12px;
+}
+
+.Window--maximizeButton {
+    font-size: 12px;
+}
+
+.Window--helpButton,
+.Window--minimizeButton,
+.Window--maximizeButton,
+.Window--closeButton {
+    margin-right: 2px;
+    cursor: pointer;
+}

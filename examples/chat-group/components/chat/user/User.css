@@ -1,0 +1,158 @@
+
+.ChatUser {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 8px;
+    box-sizing: border-box;
+    user-select: none;
+    cursor: pointer;
+}
+
+.ChatUser:hover {
+	background: #f2f2f2;
+	transition: all .2s;
+}
+
+.ChatUser--avatar {
+	width: 46px;
+	height: 46px;
+	overflow: hidden;
+	border-radius: 1000px;
+	background-position: center center;
+	background-size: cover;
+	float: left;
+	border: 1px solid transparent;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.ChatUser-selected .ChatUser--avatar {
+	box-shadow: 0px 0px 0px 2px #40ace3;
+    border: 1px solid white;
+}
+
+.ChatUser--userName {
+    float: left;
+    width: calc( 100% - 46px );
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-weight: bold;
+    font-size: 12px;
+    height: 23px;
+    line-height: 24px;
+    padding-left: 10px;
+    position: relative;
+    box-sizing: border-box;
+    font-family: Arial;
+}
+
+.ChatUser--userName:before {
+    font-family: 'Font Awesome 5 Free';
+    content: "\f00c";
+    content: "\f00c";
+    color: #40ace3;
+    font-size: 0;
+    transition: all .3s;
+    margin-right: 4px;
+}
+
+.ChatUser-selected .ChatUser--userName:before {
+    color: #40ace3;
+    font-size: 12px;
+}
+
+.ChatUser--lastSeen {
+    width: calc( 100% - 46px );
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-decoration: none;
+    color: #adadad;
+    font-family: Arial;
+    padding-left: 14px;
+    float: left;
+    box-sizing: border-box;
+}
+
+.ChatUser-online .ChatUser--lastSeen:before {
+	content: "";
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	background: rgb(0 181 0);
+	border-radius: 100px;
+	margin-right: 4px;
+	position: relative;
+	vertical-align: top;
+	margin-top: 3px;
+	box-shadow: 0px 0px 2px rgba(0, 181, 0, 0.6);
+}
+
+.ChatUser--avatar-default {
+	background: #4c6e93;
+}
+
+.ChatUser--avatar-default:before {
+    font-family: 'Font Awesome 5 Free';
+    content: "\f007";
+    font-weight: bold;
+    font-size: 38px;
+    line-height: 46px;
+    width: 100%;
+    text-align: center;
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.ChatUser--avatar:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 100px;
+    box-sizing: border-box;
+}
+
+.ChatUser--avatar-default[data-color="red"] {
+	background: rgb(211, 100, 75);
+}
+
+.ChatUser--avatar-default[data-color="green"] {
+	background: rgb(117, 192, 87);
+}
+
+.ChatUser--avatar-default[data-color="blue"] {
+	background: rgb(100, 159, 211);
+}
+
+.ChatUser--avatar-default[data-color="orange"] {
+	background: rgb(228, 168, 97);
+}
+
+.ChatUser--avatar-loading:before {
+    content: "";
+    border-radius: 100px;
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: calc( 100% - 0px );
+    height: calc( 100% - 0px );
+    border: 2px solid #6a91b1;
+    border-top: 2px solid transparent;
+    -webkit-animation: fa-spin 2s infinite linear;
+    animation: fa-spin 2s infinite linear;
+    box-sizing: border-box;
+}
+
+.ChatUser--userNameHighlight {
+    display: inline;
+    background: yellow;
+}
