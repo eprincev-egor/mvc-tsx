@@ -75,6 +75,11 @@ implements IChatGroup {
         this.setNewUsersIds(newUsersIds);
     }
 
+    removeAllUsers() {
+        const group: GroupModel = this;
+        this.setNewUsersIds([]);
+    }
+
     private setNewUsersIds(newUsersIds: string[]) {
         const group: GroupModel = this;
 

@@ -12,7 +12,8 @@ export class GroupView extends View<GroupModel> {
 
     static ui = {
         avatarInput: ".ChatGroup--avatarInput",
-        searchInput: ".ChatGroup--searchUsersInput"
+        searchInput: ".ChatGroup--searchUsersInput",
+        clearSelected: ".ChatGroup--clearSelectedButton"
     };
     
     template(group: GroupModel) {

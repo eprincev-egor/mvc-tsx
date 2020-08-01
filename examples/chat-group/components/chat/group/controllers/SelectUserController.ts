@@ -19,4 +19,11 @@ export class SelectUserController extends Controller<GroupModel> {
             group.addUser(user.id);
         }
     }
+
+    @on("click", GroupView.ui.clearSelected)
+    onClickClearSelected() {
+        const group = this.model;
+
+        group.removeAllUsers();
+    }
 }

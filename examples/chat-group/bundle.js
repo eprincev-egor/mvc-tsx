@@ -169,6 +169,10 @@ class GroupModel extends mvc_tsx_1.Model {
         const newUsersIds = group.usersIds.filter(existentUserId => existentUserId !== userId);
         this.setNewUsersIds(newUsersIds);
     }
+    removeAllUsers() {
+        const group = this;
+        this.setNewUsersIds([]);
+    }
     setNewUsersIds(newUsersIds) {
         const group = this;
         group.set({
@@ -242,7 +246,8 @@ GroupView.defaultProps = {
 };
 GroupView.ui = {
     avatarInput: ".ChatGroup--avatarInput",
-    searchInput: ".ChatGroup--searchUsersInput"
+    searchInput: ".ChatGroup--searchUsersInput",
+    clearSelected: ".ChatGroup--clearSelectedButton"
 };
 
 
@@ -412,6 +417,10 @@ let SelectUserController = class SelectUserController extends mvc_tsx_1.Controll
             group.addUser(user.id);
         }
     }
+    onClickClearSelected() {
+        const group = this.model;
+        group.removeAllUsers();
+    }
 };
 __decorate([
     mvc_tsx_1.on("click", user_1.UserView.ui.el),
@@ -420,6 +429,12 @@ __decorate([
     __metadata("design:paramtypes", [user_1.UserModel]),
     __metadata("design:returntype", void 0)
 ], SelectUserController.prototype, "onClickUser", null);
+__decorate([
+    mvc_tsx_1.on("click", GroupView_1.GroupView.ui.clearSelected),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], SelectUserController.prototype, "onClickClearSelected", null);
 SelectUserController = __decorate([
     mvc_tsx_1.forView(GroupView_1.GroupView)
 ], SelectUserController);
