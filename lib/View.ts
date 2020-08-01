@@ -20,7 +20,11 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
     constructor(props: Readonly<{model: TModel}>) {
         super(props);
 
+        this.onChangeModel = this.onChangeModel.bind(this);
+
         this.model = props.model;
+        this.state = this.getStateByModel(this.model);
+
         this.listenModelChanges();
 
         mvcEvents.emit("initView", {
@@ -29,14 +33,18 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
         });
     }
 
-    private listenModelChanges() {
-        this.model.on("change", (changes) => {
-            this.setState({changes});
-        });
-    }
-
     render() {
         return this.template(this.model);
+    }
+
+    componentWillReceiveProps(newProps: {model: TModel}) {
+        this.stopListenModel();
+
+        this.model = newProps.model;
+        this.listenModelChanges();
+
+        const newState = this.getStateByModel(this.model);
+        this.setState(newState);
     }
 
     componentDidMount() {
@@ -56,6 +64,8 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
 
         const rootEl = ReactDOM.findDOMNode(this) as any;
         delete rootEl._view;
+
+        this.stopListenModel();
     }
 
     /**
@@ -65,4 +75,32 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
     onDestroy() {
         // redefine me
     }
+
+    private stopListenModel() {
+        this.model.off("change", this.onChangeModel);
+    }
+
+    private listenModelChanges() {
+        this.model.on("change", this.onChangeModel);
+    }
+
+    private onChangeModel(changes: Partial<TModel>) {
+        this.setState({
+            ...changes
+        });
+    }
+
+    private getStateByModel(model: TModel) {
+        const newState: any = {
+            ...this.model
+        };
+
+        const emitterProps = ["_events", "_eventsCount", "_maxListeners"];
+        for (const emitterProp of emitterProps) {
+            delete newState[ emitterProp ];
+        }
+
+        return newState;
+    }
+
 }

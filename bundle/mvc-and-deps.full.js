@@ -29588,20 +29588,24 @@ const mvcEvents_1 = __webpack_require__("./lib/mvcEvents.ts");
 class View extends React.Component {
     constructor(props) {
         super(props);
+        this.onChangeModel = this.onChangeModel.bind(this);
         this.model = props.model;
+        this.state = this.getStateByModel(this.model);
         this.listenModelChanges();
         mvcEvents_1.mvcEvents.emit("initView", {
             view: this,
             model: this.model
         });
     }
-    listenModelChanges() {
-        this.model.on("change", (changes) => {
-            this.setState({ changes });
-        });
-    }
     render() {
         return this.template(this.model);
+    }
+    componentWillReceiveProps(newProps) {
+        this.stopListenModel();
+        this.model = newProps.model;
+        this.listenModelChanges();
+        const newState = this.getStateByModel(this.model);
+        this.setState(newState);
     }
     componentDidMount() {
         const rootEl = ReactDOM.findDOMNode(this);
@@ -29616,6 +29620,7 @@ class View extends React.Component {
         });
         const rootEl = ReactDOM.findDOMNode(this);
         delete rootEl._view;
+        this.stopListenModel();
     }
     /**
      * Detach listeners and fix any memory leaks.
@@ -29623,6 +29628,27 @@ class View extends React.Component {
      */
     onDestroy() {
         // redefine me
+    }
+    stopListenModel() {
+        this.model.off("change", this.onChangeModel);
+    }
+    listenModelChanges() {
+        this.model.on("change", this.onChangeModel);
+    }
+    onChangeModel(changes) {
+        this.setState({
+            ...changes
+        });
+    }
+    getStateByModel(model) {
+        const newState = {
+            ...this.model
+        };
+        const emitterProps = ["_events", "_eventsCount", "_maxListeners"];
+        for (const emitterProp of emitterProps) {
+            delete newState[emitterProp];
+        }
+        return newState;
     }
 }
 exports.View = View;
