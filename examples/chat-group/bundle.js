@@ -297,11 +297,37 @@ const mvc_tsx_1 = __webpack_require__("mvc-tsx");
 const GroupModel_1 = __webpack_require__("./examples/chat-group/components/chat/group/GroupModel.ts");
 const GroupView_1 = __webpack_require__("./examples/chat-group/components/chat/group/GroupView.tsx");
 const UsersService_1 = __webpack_require__("./examples/chat-group/server/UsersService.ts");
+const ENTER_KEY_CODE = 13;
 let SearchUsersController = class SearchUsersController extends mvc_tsx_1.Controller {
     constructor(group) {
         super(group);
         this.usersService = new UsersService_1.UsersService();
         this.load();
+    }
+    onKeyupInSearchInput(searchPhrase, keyCode) {
+        const group = this.model;
+        group.setSearchPhrase(searchPhrase);
+        if (keyCode === ENTER_KEY_CODE) {
+            this.onPressEnter();
+        }
+        else {
+            this.onChangeSearchPhrase();
+        }
+    }
+    onPressEnter() {
+        this.clearTimeout();
+        this.load();
+    }
+    onChangeSearchPhrase() {
+        this.clearTimeout();
+        this.timer = setTimeout(() => {
+            this.load();
+        }, 2000);
+    }
+    clearTimeout() {
+        if (this.timer) {
+            clearTimeout(this.timer);
+        }
     }
     async load() {
         const group = this.model;
@@ -309,24 +335,15 @@ let SearchUsersController = class SearchUsersController extends mvc_tsx_1.Contro
         const users = await this.usersService.findUsers(searchPhrase || undefined);
         group.setFilteredUsers(users);
     }
-    onChangeSearchPhrase(searchPhrase) {
-        const group = this.model;
-        group.setSearchPhrase(searchPhrase);
-        if (this.timer) {
-            clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(() => {
-            this.load();
-        }, 2000);
-    }
 };
 __decorate([
     mvc_tsx_1.on("keyup", GroupView_1.GroupView.ui.searchInput),
     __param(0, mvc_tsx_1.event("target", "value")),
+    __param(1, mvc_tsx_1.event("keyCode")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Number]),
     __metadata("design:returntype", void 0)
-], SearchUsersController.prototype, "onChangeSearchPhrase", null);
+], SearchUsersController.prototype, "onKeyupInSearchInput", null);
 SearchUsersController = __decorate([
     mvc_tsx_1.forView(GroupView_1.GroupView),
     __metadata("design:paramtypes", [GroupModel_1.GroupModel])

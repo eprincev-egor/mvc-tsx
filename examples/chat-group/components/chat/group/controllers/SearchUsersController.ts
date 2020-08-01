@@ -3,6 +3,8 @@ import { GroupModel } from "../GroupModel";
 import { GroupView } from "../GroupView";
 import { UsersService } from "../../../../server/UsersService";
 
+const ENTER_KEY_CODE = 13;
+
 @forView(GroupView)
 export class SearchUsersController extends Controller<GroupModel> {
     
@@ -16,27 +18,46 @@ export class SearchUsersController extends Controller<GroupModel> {
         this.load();
     }
 
-    async load() {
+    @on("keyup", GroupView.ui.searchInput)
+    onKeyupInSearchInput(
+        @event("target", "value") searchPhrase: string,
+        @event("keyCode") keyCode: number
+    ) {
+        const group = this.model;
+        group.setSearchPhrase(searchPhrase);
+
+        if ( keyCode === ENTER_KEY_CODE ) {
+            this.onPressEnter();
+        }
+        else {
+            this.onChangeSearchPhrase();
+        }
+    }
+
+    private onPressEnter() {
+        this.clearTimeout();
+        this.load();
+    }
+
+    private onChangeSearchPhrase() {
+        this.clearTimeout();
+
+        this.timer = setTimeout(() => {
+            this.load();
+        }, 2000);
+    }
+
+    private clearTimeout() {
+        if ( this.timer ) {
+            clearTimeout(this.timer);
+        }
+    }
+
+    private async load() {
         const group = this.model;
         const searchPhrase = group.searchPhrase;
         const users = await this.usersService.findUsers(searchPhrase || undefined);
 
         group.setFilteredUsers( users );
-    }
-
-    @on("keyup", GroupView.ui.searchInput)
-    onChangeSearchPhrase(
-        @event("target", "value") searchPhrase: string
-    ) {
-        const group = this.model;
-        group.setSearchPhrase(searchPhrase);
-
-        if ( this.timer ) {
-            clearTimeout(this.timer);
-        }
-
-        this.timer = setTimeout(() => {
-            this.load();
-        }, 2000);
     }
 }
