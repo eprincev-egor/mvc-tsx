@@ -52,9 +52,25 @@ export class GroupView extends View<GroupModel> {
     }
 
     getSelectedUsersCountText(group: GroupModel) {
-        if ( !group.usersIds.length ) {
+        const membersCount = group.usersIds.length;
+
+        if ( !membersCount ) {
             return "";
         }
+
+        let membersPhrase: string = "участников";
+        if (
+            /^[^1]?1$/.test(membersCount.toString())
+        ) {
+            membersPhrase = "участник";
+        } else if (
+            /^[^1]?[234]$/.test(membersCount.toString())
+        ) {
+            membersPhrase = "участника";
+        }
+
+        const output = `${membersCount} ${membersPhrase}`;
+        return output;
     }
 
     private printAvatar(group: GroupModel) {

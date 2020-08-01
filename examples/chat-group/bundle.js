@@ -223,9 +223,19 @@ class GroupView extends mvc_tsx_1.View {
                 react_1.default.createElement("div", { className: "ChatGroup--clearSelectedButton" }, "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C")));
     }
     getSelectedUsersCountText(group) {
-        if (!group.usersIds.length) {
+        const membersCount = group.usersIds.length;
+        if (!membersCount) {
             return "";
         }
+        let membersPhrase = "участников";
+        if (/^[^1]?1$/.test(membersCount.toString())) {
+            membersPhrase = "участник";
+        }
+        else if (/^[^1]?[234]$/.test(membersCount.toString())) {
+            membersPhrase = "участника";
+        }
+        const output = `${membersCount} ${membersPhrase}`;
+        return output;
     }
     printAvatar(group) {
         if (group.avatar) {
