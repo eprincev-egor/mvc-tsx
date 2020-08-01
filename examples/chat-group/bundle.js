@@ -153,6 +153,32 @@ class GroupModel extends mvc_tsx_1.Model {
             avatar: newAvatar
         });
     }
+    addUser(userId) {
+        const group = this;
+        if (group.usersIds.includes(userId)) {
+            return;
+        }
+        const newUsersIds = [...group.usersIds, userId];
+        this.setNewUsersIds(newUsersIds);
+    }
+    removeUser(userId) {
+        const group = this;
+        if (!group.usersIds.includes(userId)) {
+            return;
+        }
+        const newUsersIds = group.usersIds.filter(existentUserId => existentUserId !== userId);
+        this.setNewUsersIds(newUsersIds);
+    }
+    setNewUsersIds(newUsersIds) {
+        const group = this;
+        group.set({
+            usersIds: newUsersIds
+        });
+        this.filteredUsers.forEach(user => {
+            const isSelected = newUsersIds.includes(user.id);
+            user.setSelected(isSelected);
+        });
+    }
 }
 exports.GroupModel = GroupModel;
 
@@ -354,6 +380,54 @@ exports.SearchUsersController = SearchUsersController;
 
 /***/ }),
 
+/***/ "./examples/chat-group/components/chat/group/controllers/SelectUserController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SelectUserController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const GroupView_1 = __webpack_require__("./examples/chat-group/components/chat/group/GroupView.tsx");
+const user_1 = __webpack_require__("./examples/chat-group/components/chat/user/index.ts");
+let SelectUserController = class SelectUserController extends mvc_tsx_1.Controller {
+    onClickUser(user) {
+        const group = this.model;
+        if (user.selected) {
+            group.removeUser(user.id);
+        }
+        else {
+            group.addUser(user.id);
+        }
+    }
+};
+__decorate([
+    mvc_tsx_1.on("click", user_1.UserView.ui.el),
+    __param(0, mvc_tsx_1.event(user_1.UserModel)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_1.UserModel]),
+    __metadata("design:returntype", void 0)
+], SelectUserController.prototype, "onClickUser", null);
+SelectUserController = __decorate([
+    mvc_tsx_1.forView(GroupView_1.GroupView)
+], SelectUserController);
+exports.SelectUserController = SelectUserController;
+
+
+/***/ }),
+
 /***/ "./examples/chat-group/components/chat/group/controllers/UploadAvatarController.ts":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -411,7 +485,7 @@ exports.UploadAvatarController = UploadAvatarController;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OnlineStatusController = exports.UploadAvatarController = exports.SearchUsersController = exports.GroupView = exports.GroupModel = void 0;
+exports.SelectUserController = exports.OnlineStatusController = exports.UploadAvatarController = exports.SearchUsersController = exports.GroupView = exports.GroupModel = void 0;
 const GroupModel_1 = __webpack_require__("./examples/chat-group/components/chat/group/GroupModel.ts");
 Object.defineProperty(exports, "GroupModel", { enumerable: true, get: function () { return GroupModel_1.GroupModel; } });
 const GroupView_1 = __webpack_require__("./examples/chat-group/components/chat/group/GroupView.tsx");
@@ -422,6 +496,8 @@ const UploadAvatarController_1 = __webpack_require__("./examples/chat-group/comp
 Object.defineProperty(exports, "UploadAvatarController", { enumerable: true, get: function () { return UploadAvatarController_1.UploadAvatarController; } });
 const OnlineStatusController_1 = __webpack_require__("./examples/chat-group/components/chat/group/controllers/OnlineStatusController.ts");
 Object.defineProperty(exports, "OnlineStatusController", { enumerable: true, get: function () { return OnlineStatusController_1.OnlineStatusController; } });
+const SelectUserController_1 = __webpack_require__("./examples/chat-group/components/chat/group/controllers/SelectUserController.ts");
+Object.defineProperty(exports, "SelectUserController", { enumerable: true, get: function () { return SelectUserController_1.SelectUserController; } });
 
 
 /***/ }),
@@ -562,6 +638,12 @@ class UserModel extends mvc_tsx_1.Model {
         }
         return "";
     }
+    setSelected(newSelectedState) {
+        const user = this;
+        user.set({
+            selected: newSelectedState
+        });
+    }
 }
 exports.UserModel = UserModel;
 
@@ -594,6 +676,9 @@ class UserView extends mvc_tsx_1.View {
         if (user.isOnline()) {
             classes.push("ChatUser-online");
         }
+        if (user.selected) {
+            classes.push("ChatUser-selected");
+        }
         const className = classes.join(" ");
         return className;
     }
@@ -609,6 +694,9 @@ class UserView extends mvc_tsx_1.View {
     }
 }
 exports.UserView = UserView;
+UserView.ui = {
+    el: ".ChatUser"
+};
 
 
 /***/ }),

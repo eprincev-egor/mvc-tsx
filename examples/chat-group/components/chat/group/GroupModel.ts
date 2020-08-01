@@ -50,4 +50,40 @@ implements IChatGroup {
             avatar: newAvatar
         });
     }
+
+    addUser(userId: string) {
+        const group: GroupModel = this;
+
+        if ( group.usersIds.includes(userId) ) {
+            return;
+        }
+
+        const newUsersIds = [...group.usersIds, userId];
+        this.setNewUsersIds(newUsersIds);
+    }
+
+    removeUser(userId: string) {
+        const group: GroupModel = this;
+
+        if ( !group.usersIds.includes(userId) ) {
+            return;
+        }
+
+        const newUsersIds = group.usersIds.filter(existentUserId =>
+            existentUserId !== userId
+        );
+        this.setNewUsersIds(newUsersIds);
+    }
+
+    private setNewUsersIds(newUsersIds: string[]) {
+        const group: GroupModel = this;
+
+        group.set({
+            usersIds: newUsersIds
+        });
+        this.filteredUsers.forEach(user => {
+            const isSelected = newUsersIds.includes(user.id);
+            user.setSelected(isSelected);
+        });
+    }
 }

@@ -102,4 +102,12 @@ implements IUser {
 
         return "";
     }
+
+    setSelected(newSelectedState: boolean) {
+        const user: UserModel = this;
+
+        user.set({
+            selected: newSelectedState
+        });
+    }
 }

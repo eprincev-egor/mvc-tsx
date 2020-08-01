@@ -5,6 +5,10 @@ import { Highlight } from "./Highlight";
 import "./User.css";
 
 export class UserView extends View<UserModel> {
+
+    static ui = {
+        el: ".ChatUser"
+    };
     
     template(user: UserModel) {
         return <div className={this.getClassName(user)}>
@@ -27,6 +31,10 @@ export class UserView extends View<UserModel> {
 
         if ( user.isOnline() ) {
             classes.push("ChatUser-online");
+        }
+
+        if ( user.selected ) {
+            classes.push("ChatUser-selected");
         }
         
         const className = classes.join(" ");
