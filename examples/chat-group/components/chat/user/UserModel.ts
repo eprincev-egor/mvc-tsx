@@ -12,7 +12,11 @@ implements IUser {
     selected: boolean = false;
     highlightPhrase: string = "";
     
-    constructor(userRow: IUser, selected: boolean = false, highlightPhrase: string = "") {
+    constructor(
+        userRow: IUser, 
+        selected: boolean = false, 
+        highlightPhrase: string = ""
+    ) {
         super();
         
         this.id = userRow.id;

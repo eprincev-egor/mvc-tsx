@@ -67,6 +67,6 @@
 .Window--minimizeButton,
 .Window--maximizeButton,
 .Window--closeButton {
-    margin-right: 2px;
+    margin-right: 4px;
     cursor: pointer;
 }

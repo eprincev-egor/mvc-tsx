@@ -31,7 +31,14 @@ export class GroupView extends View<GroupModel> {
                 </div>
             </div>
 
-            <div className="ChatGroup--users">
+            <div className={"ChatGroup--users " + (
+                group.filteredUsers.length === 0 ?
+                    "ChatGroup--users-empty" : ""
+            )}>
+                <div className="ChatGroup--usersEmptyBox">
+                <div className="ChatGroup--usersEmptyText">Нет пользователей</div>
+                </div>
+
                 {group.filteredUsers.map(user =>
                     <UserView model={user} key={user.id}></UserView>
                 )}

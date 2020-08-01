@@ -110,6 +110,31 @@
     padding-bottom: 6px;
 }
 
+
+.ChatGroup--usersEmptyText {
+	display: inline-block;
+	font-family: Arial;
+	background: rgb(189, 189, 189);
+	color: white;
+	padding: 2px 12px;
+	font-size: 12px;
+	border-radius: 10px;
+	padding-top: 3px;
+}
+
+.ChatGroup--usersEmptyBox {
+	display: none;
+	position: absolute;
+	top: 50%;
+	width: 100%;
+	text-align: center;
+	margin-top: -11px;
+}
+
+.ChatGroup--users-empty .ChatGroup--usersEmptyBox {
+	display: block;
+}
+
 .ChatGroup--bottom {
     position: absolute;
     bottom: 0;
