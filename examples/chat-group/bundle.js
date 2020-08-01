@@ -398,6 +398,43 @@ Object.defineProperty(exports, "OnlineStatusController", { enumerable: true, get
 
 /***/ }),
 
+/***/ "./examples/chat-group/components/chat/user/Highlight.tsx":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Highlight = void 0;
+const react_1 = __importDefault(__webpack_require__("react"));
+class Highlight extends react_1.default.Component {
+    render() {
+        if (!this.props.highlightText) {
+            return react_1.default.createElement("div", { className: this.props.className }, this.props.text);
+        }
+        const lowerText = this.props.text.toLowerCase();
+        const lowerHighlightPhrase = this.props.text;
+        const startHighlight = lowerText.indexOf(lowerHighlightPhrase);
+        const endHighlight = startHighlight + lowerHighlightPhrase.length;
+        if (startHighlight === -1) {
+            return react_1.default.createElement("div", { className: this.props.className }, this.props.text);
+        }
+        const beforeText = this.props.text.slice(0, startHighlight);
+        const highlightedText = this.props.text.slice(startHighlight, endHighlight);
+        const afterText = this.props.text.slice(endHighlight);
+        return react_1.default.createElement("div", { className: this.props.className },
+            beforeText,
+            react_1.default.createElement("span", { className: this.props.highlightClassName }, highlightedText),
+            afterText);
+    }
+}
+exports.Highlight = Highlight;
+
+
+/***/ }),
+
 /***/ "./examples/chat-group/components/chat/user/User.css":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -480,32 +517,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserView = void 0;
 const react_1 = __importDefault(__webpack_require__("react"));
 const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const Highlight_1 = __webpack_require__("./examples/chat-group/components/chat/user/Highlight.tsx");
 __webpack_require__("./examples/chat-group/components/chat/user/User.css");
 class UserView extends mvc_tsx_1.View {
     template(user) {
         return react_1.default.createElement("div", { className: "ChatUser" },
             react_1.default.createElement("div", { className: "ChatUser--avatar", style: this.getAvatarStyles(user), "data-color": "red" }),
-            this.getHighlightedName(user),
+            react_1.default.createElement(Highlight_1.Highlight, { className: "ChatUser--userName", highlightClassName: "ChatUser--userNameHighlight", text: user.name, highlightText: user.highlightPhrase }),
             react_1.default.createElement("div", { className: "ChatUser--lastSeen" }, this.getOnlineStatus(user)));
-    }
-    getHighlightedName(user) {
-        if (!user.highlightPhrase) {
-            return react_1.default.createElement("div", { className: "ChatUser--userName" }, user.name);
-        }
-        const lowerName = user.name.toLowerCase();
-        const lowerHighlightPhrase = user.highlightPhrase;
-        const startHighlight = lowerName.indexOf(lowerHighlightPhrase);
-        const endHighlight = startHighlight + lowerHighlightPhrase.length;
-        if (startHighlight === -1) {
-            return react_1.default.createElement("div", { className: "ChatUser--userName" }, user.name);
-        }
-        const beforeText = user.name.slice(0, startHighlight);
-        const highlightedText = user.name.slice(startHighlight, endHighlight);
-        const afterText = user.name.slice(endHighlight);
-        return react_1.default.createElement("div", { className: "ChatUser--userName" },
-            beforeText,
-            react_1.default.createElement("span", { className: "ChatUser--userNameHighlight" }, highlightedText),
-            afterText);
     }
     getAvatarStyles(user) {
         if (!user.avatar) {
