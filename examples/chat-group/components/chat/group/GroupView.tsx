@@ -19,9 +19,8 @@ export class GroupView extends View<GroupModel> {
         return <div className="ChatGroup">
 
             <div className="ChatGroup--head">
-                <div className="ChatGroup--avatar fas fa-image">
-                    <input accept="image/*" type="file" className="ChatGroup--avatarInput"/>
-                </div>
+                {this.printAvatar(group)}
+                
                 <div className="ChatGroup--form">
                     <input className="ChatGroup--groupNameInput" placeholder="Наименование группы" autoFocus/>
 
@@ -54,6 +53,19 @@ export class GroupView extends View<GroupModel> {
     getSelectedUsersCountText(group: GroupModel) {
         if ( !group.usersIds.length ) {
             return "";
+        }
+    }
+
+    private printAvatar(group: GroupModel) {
+        if ( group.avatar ) {
+            return <div className="ChatGroup--avatar" style={{
+                backgroundImage: `url('${group.avatar.url}')`
+            }}></div>
+        }
+        else {
+            return <div className="ChatGroup--avatar fas fa-image">
+                <input accept="image/*" type="file" className="ChatGroup--avatarInput"/>
+            </div>
         }
     }
 }

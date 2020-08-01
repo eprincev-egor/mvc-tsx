@@ -14,7 +14,9 @@
     width: 63px;
     height: 79px;
     float: left;
-    position: relative;
+	position: relative;
+	background-size: cover;
+	background-position: center center;
 }
 
 .ChatGroup--avatar:before {
