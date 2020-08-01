@@ -201,7 +201,8 @@ class GroupView extends mvc_tsx_1.View {
         if (group.avatar) {
             return react_1.default.createElement("div", { className: "ChatGroup--avatar", style: {
                     backgroundImage: `url('${group.avatar.url}')`
-                } });
+                } },
+                react_1.default.createElement("input", { accept: "image/*", type: "file", className: "ChatGroup--avatarInput" }));
         }
         else {
             return react_1.default.createElement("div", { className: "ChatGroup--avatar fas fa-image" },

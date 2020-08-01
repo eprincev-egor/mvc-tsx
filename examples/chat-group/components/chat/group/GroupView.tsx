@@ -60,7 +60,9 @@ export class GroupView extends View<GroupModel> {
         if ( group.avatar ) {
             return <div className="ChatGroup--avatar" style={{
                 backgroundImage: `url('${group.avatar.url}')`
-            }}></div>
+            }}>
+                <input accept="image/*" type="file" className="ChatGroup--avatarInput"/>
+            </div>
         }
         else {
             return <div className="ChatGroup--avatar fas fa-image">
