@@ -509,6 +509,18 @@ class UserModel extends mvc_tsx_1.Model {
         this.selected = selected;
         this.highlightPhrase = highlightPhrase;
     }
+    getColor() {
+        const user = this;
+        const colors = [
+            "red",
+            "green",
+            "blue",
+            "orange"
+        ];
+        const colorIndex = +user.id % colors.length;
+        const color = colors[colorIndex];
+        return color;
+    }
     setLastLogin(loginDate) {
         const user = this;
         if (user.lastLogin && user.lastLogin > loginDate) {
@@ -526,6 +538,29 @@ class UserModel extends mvc_tsx_1.Model {
         user.set({
             lastLogout: logoutDate
         });
+    }
+    isOnline() {
+        const user = this;
+        const isOnline = user.lastLogin && (!user.lastLogout
+            ||
+                user.lastLogout < user.lastLogin);
+        return isOnline;
+    }
+    getOnlineStatus() {
+        const user = this;
+        if (!user.lastLogin) {
+            return "Не заходил";
+        }
+        const isOnline = (!user.lastLogout
+            ||
+                user.lastLogout < user.lastLogin);
+        if (isOnline) {
+            return "Онлайн";
+        }
+        if (user.lastLogout) {
+            return `Заходил ${user.lastLogout.toLocaleTimeString()}`;
+        }
+        return "";
     }
 }
 exports.UserModel = UserModel;
@@ -549,33 +584,28 @@ const Highlight_1 = __webpack_require__("./examples/chat-group/components/chat/u
 __webpack_require__("./examples/chat-group/components/chat/user/User.css");
 class UserView extends mvc_tsx_1.View {
     template(user) {
-        return react_1.default.createElement("div", { className: "ChatUser" },
-            react_1.default.createElement("div", { className: "ChatUser--avatar", style: this.getAvatarStyles(user), "data-color": "red" }),
+        return react_1.default.createElement("div", { className: this.getClassName(user) },
+            this.printAvatar(user),
             react_1.default.createElement(Highlight_1.Highlight, { className: "ChatUser--userName", highlightClassName: "ChatUser--userNameHighlight", text: user.name, highlightText: user.highlightPhrase }),
-            react_1.default.createElement("div", { className: "ChatUser--lastSeen" }, this.getOnlineStatus(user)));
+            react_1.default.createElement("div", { className: "ChatUser--lastSeen" }, user.getOnlineStatus()));
     }
-    getAvatarStyles(user) {
-        if (!user.avatar) {
-            return {};
+    getClassName(user) {
+        const classes = ["ChatUser"];
+        if (user.isOnline()) {
+            classes.push("ChatUser-online");
         }
-        return {
-            backgroundImage: `url('${user.avatar.url}')`
-        };
+        const className = classes.join(" ");
+        return className;
     }
-    getOnlineStatus(user) {
-        if (!user.lastLogin) {
-            return "Не заходил";
+    printAvatar(user) {
+        if (user.avatar) {
+            return react_1.default.createElement("div", { className: "ChatUser--avatar", style: {
+                    backgroundImage: `url('${user.avatar.url}')`
+                } });
         }
-        const isOnline = (!user.lastLogout
-            ||
-                user.lastLogout < user.lastLogin);
-        if (isOnline) {
-            return "Онлайн";
+        else {
+            return react_1.default.createElement("div", { className: "ChatUser--avatar ChatUser--avatar-default", "data-color": user.getColor() });
         }
-        if (user.lastLogout) {
-            return `Заходил ${user.lastLogout.toLocaleTimeString()}`;
-        }
-        return "";
     }
 }
 exports.UserView = UserView;

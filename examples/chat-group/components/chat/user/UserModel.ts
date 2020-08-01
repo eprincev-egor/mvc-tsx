@@ -29,6 +29,21 @@ implements IUser {
         this.highlightPhrase = highlightPhrase;
     }
 
+    getColor() {
+        const user = this;
+
+        const colors = [
+            "red",
+            "green",
+            "blue",
+            "orange"
+        ];
+        const colorIndex = +user.id % colors.length;
+        const color = colors[ colorIndex ];
+
+        return color;
+    }
+
     setLastLogin(loginDate: Date) {
         const user: UserModel = this;
 
@@ -51,5 +66,40 @@ implements IUser {
         user.set({
             lastLogout: logoutDate
         });
+    }
+
+    isOnline() {
+        const user = this;
+
+        const isOnline = user.lastLogin && (
+            !user.lastLogout 
+            ||
+            user.lastLogout < user.lastLogin
+        );
+
+        return isOnline;
+    }
+
+    getOnlineStatus() {
+        const user = this;
+
+        if ( !user.lastLogin ) {
+            return "Не заходил";
+        }
+
+        const isOnline = (
+            !user.lastLogout 
+            ||
+            user.lastLogout < user.lastLogin
+        );
+        if ( isOnline ) {
+            return "Онлайн"
+        }
+
+        if ( user.lastLogout ) {
+            return `Заходил ${ user.lastLogout.toLocaleTimeString() }`;
+        }
+
+        return "";
     }
 }

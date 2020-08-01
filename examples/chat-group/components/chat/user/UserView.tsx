@@ -7,8 +7,9 @@ import "./User.css";
 export class UserView extends View<UserModel> {
     
     template(user: UserModel) {
-        return <div className="ChatUser">
-            <div className="ChatUser--avatar" style={this.getAvatarStyles(user)} data-color="red"></div>
+        return <div className={this.getClassName(user)}>
+
+            {this.printAvatar(user)}
 
             <Highlight 
                 className="ChatUser--userName"
@@ -17,38 +18,31 @@ export class UserView extends View<UserModel> {
                 highlightText={user.highlightPhrase}
             />
 
-            <div className="ChatUser--lastSeen">{this.getOnlineStatus(user)}</div>
+            <div className="ChatUser--lastSeen">{user.getOnlineStatus()}</div>
         </div>
     }
 
-    private getAvatarStyles(user: UserModel) {
-        if ( !user.avatar ) {
-            return {};
-        }
+    private getClassName(user: UserModel) {
+        const classes = ["ChatUser"];
 
-        return {
-            backgroundImage: `url('${user.avatar.url}')`
+        if ( user.isOnline() ) {
+            classes.push("ChatUser-online");
         }
+        
+        const className = classes.join(" ");
+        return className;
     }
 
-    private getOnlineStatus(user: UserModel) {
-        if ( !user.lastLogin ) {
-            return "Не заходил";
+    private printAvatar(user: UserModel) {
+        if ( user.avatar ) {
+            return <div className="ChatUser--avatar" 
+                style={{
+                    backgroundImage: `url('${user.avatar.url}')`
+                }}></div>
         }
-
-        const isOnline = (
-            !user.lastLogout 
-            ||
-            user.lastLogout < user.lastLogin
-        );
-        if ( isOnline ) {
-            return "Онлайн"
+        else {
+            return <div className="ChatUser--avatar ChatUser--avatar-default"
+                data-color={user.getColor()}></div>
         }
-
-        if ( user.lastLogout ) {
-            return `Заходил ${ user.lastLogout.toLocaleTimeString() }`;
-        }
-
-        return "";
     }
 }
