@@ -108,12 +108,15 @@ describe("View", () => {
 
         // check default name
         const user1El = document.querySelector(".user.id-1") as HTMLDivElement;
-        assert.strictEqual(user1El.textContent, "Bob");
+        assert.strictEqual(user1El.textContent, "Bob", "first render, first user, text content");
 
-        assert.deepStrictEqual(userView1.state, {
+        assert.deepStrictEqual({
+            id: (userView1.state as any).id,
+            name: (userView1.state as any).name
+        }, {
             id: 1,
             name: "Bob"
-        });
+        }, "first render, first user, state");
 
         rootModel.setUsers([
             new UserModel(1, "Jack"),
@@ -121,24 +124,30 @@ describe("View", () => {
         ]);
         const newUserModel1 = rootModel.users[0];
 
-        assert.deepStrictEqual(userView1.state, {
+        assert.deepStrictEqual({
+            id: (userView1.state as any).id,
+            name: (userView1.state as any).name
+        }, {
             id: 1,
             name: "Jack"
-        });
-        assert.strictEqual(user1El.textContent, "Jack");
+        }, "second render, first user, state");
+        assert.strictEqual(user1El.textContent, "Jack", "second render, first user, text content");
 
         newUserModel1.set({name: "new name"});
-        assert.strictEqual(user1El.textContent, "new name");
+        assert.strictEqual(user1El.textContent, "new name", "third render, first user, text content");
 
         oldUserModel1.set({
             name: "never"
         });
 
-        assert.strictEqual(user1El.textContent, "new name");
-        assert.deepStrictEqual(userView1.state, {
+        assert.strictEqual(user1El.textContent, "new name", "no changes after change old model");
+        assert.deepStrictEqual({
+            id: (userView1.state as any).id,
+            name: (userView1.state as any).name
+        }, {
             id: 1,
             name: "new name"
-        });
+        }, "no changes after change old model");
     });
 
 });
