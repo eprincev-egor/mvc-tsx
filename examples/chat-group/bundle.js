@@ -602,6 +602,7 @@ class UserModel extends mvc_tsx_1.Model {
         super();
         this.selected = false;
         this.highlightPhrase = "";
+        this.avatarImageLoading = true;
         this.id = userRow.id;
         this.name = userRow.name;
         this.avatar = userRow.avatar;
@@ -669,6 +670,12 @@ class UserModel extends mvc_tsx_1.Model {
             selected: newSelectedState
         });
     }
+    turnoffAvatarImageLoading() {
+        const user = this;
+        user.set({
+            avatarImageLoading: false
+        });
+    }
 }
 exports.UserModel = UserModel;
 
@@ -709,9 +716,12 @@ class UserView extends mvc_tsx_1.View {
     }
     printAvatar(user) {
         if (user.avatar) {
-            return react_1.default.createElement("div", { className: "ChatUser--avatar", style: {
+            return react_1.default.createElement("div", { className: "ChatUser--avatar" + (user.avatarImageLoading ?
+                    " ChatUser--avatar-loading" :
+                    ""), style: {
                     backgroundImage: `url('${user.avatar.url}')`
-                } });
+                } },
+                react_1.default.createElement("img", { className: "ChatUser--avatarImg", src: user.avatar.url, style: { opacity: "0", position: "absolute" }, onLoad: (event) => console.log("loaded") }));
         }
         else {
             return react_1.default.createElement("div", { className: "ChatUser--avatar ChatUser--avatar-default", "data-color": user.getColor() });
@@ -720,8 +730,44 @@ class UserView extends mvc_tsx_1.View {
 }
 exports.UserView = UserView;
 UserView.ui = {
-    el: ".ChatUser"
+    el: ".ChatUser",
+    avatarImage: ".ChatUser--avatarImg"
 };
+
+
+/***/ }),
+
+/***/ "./examples/chat-group/components/chat/user/controllers/ImageLoadingController.ts":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ImageLoadingController = void 0;
+const mvc_tsx_1 = __webpack_require__("mvc-tsx");
+const __1 = __webpack_require__("./examples/chat-group/components/chat/user/index.ts");
+class ImageLoadingController extends mvc_tsx_1.Controller {
+    onLoadImage() {
+        const user = this.model;
+        user.turnoffAvatarImageLoading();
+    }
+}
+__decorate([
+    mvc_tsx_1.on("load", __1.UserView.ui.avatarImage),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ImageLoadingController.prototype, "onLoadImage", null);
+exports.ImageLoadingController = ImageLoadingController;
 
 
 /***/ }),
@@ -732,11 +778,13 @@ UserView.ui = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserView = exports.UserModel = void 0;
+exports.ImageLoadingController = exports.UserView = exports.UserModel = void 0;
 const UserModel_1 = __webpack_require__("./examples/chat-group/components/chat/user/UserModel.ts");
 Object.defineProperty(exports, "UserModel", { enumerable: true, get: function () { return UserModel_1.UserModel; } });
 const UserView_1 = __webpack_require__("./examples/chat-group/components/chat/user/UserView.tsx");
 Object.defineProperty(exports, "UserView", { enumerable: true, get: function () { return UserView_1.UserView; } });
+const ImageLoadingController_1 = __webpack_require__("./examples/chat-group/components/chat/user/controllers/ImageLoadingController.ts");
+Object.defineProperty(exports, "ImageLoadingController", { enumerable: true, get: function () { return ImageLoadingController_1.ImageLoadingController; } });
 
 
 /***/ }),

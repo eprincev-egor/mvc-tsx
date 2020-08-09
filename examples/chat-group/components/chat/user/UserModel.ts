@@ -11,6 +11,7 @@ implements IUser {
     
     selected: boolean = false;
     highlightPhrase: string = "";
+    avatarImageLoading: boolean = true;
     
     constructor(
         userRow: IUser, 
@@ -108,6 +109,14 @@ implements IUser {
 
         user.set({
             selected: newSelectedState
+        });
+    }
+
+    turnoffAvatarImageLoading() {
+        const user: UserModel = this;
+
+        user.set({
+            avatarImageLoading: false
         });
     }
 }

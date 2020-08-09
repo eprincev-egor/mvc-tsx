@@ -7,7 +7,8 @@ import "./User.css";
 export class UserView extends View<UserModel> {
 
     static ui = {
-        el: ".ChatUser"
+        el: ".ChatUser",
+        avatarImage: ".ChatUser--avatarImg"
     };
     
     template(user: UserModel) {
@@ -43,10 +44,22 @@ export class UserView extends View<UserModel> {
 
     private printAvatar(user: UserModel) {
         if ( user.avatar ) {
-            return <div className="ChatUser--avatar" 
+            return <div className={"ChatUser--avatar" + (
+                user.avatarImageLoading ? 
+                    " ChatUser--avatar-loading" : 
+                    ""
+                )}
+
                 style={{
                     backgroundImage: `url('${user.avatar.url}')`
-                }}></div>
+                }}>
+                    <img 
+                        className="ChatUser--avatarImg"
+                        src={user.avatar.url} 
+                        style={{opacity: "0", position: "absolute"}}
+                        onLoad={(event: any) => console.log("loaded")}
+                    />
+            </div>
         }
         else {
             return <div className="ChatUser--avatar ChatUser--avatar-default"
