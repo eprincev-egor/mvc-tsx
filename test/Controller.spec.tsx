@@ -1299,4 +1299,43 @@ describe("Controller", () => {
         assert.strictEqual(actualChildName, "oliver");
     });
 
+    it("listen image load", () => {
+        let hasCall = false;
+
+        class MyModel extends Model {}
+
+        class MyView extends View<MyModel> {
+            static ui = {
+                img: ".img"
+            };
+
+            template(model: MyModel) {
+                return <div>
+                    <img className="img"/>
+                </div>
+            }
+        }
+
+        @forView(MyView)
+        class MyController extends Controller<MyModel> {
+
+            @on("load", MyView.ui.img)
+            onLoadImage() {
+                hasCall = true;
+            }
+        }
+
+        const testModel = new MyModel();
+        act(() => {
+            render(<MyView model={testModel}/>, container);
+        });
+
+        const imgEl = document.querySelector(".img") as HTMLInputElement;
+
+        const loadEvent = new window.Event("load", {bubbles: false});
+        imgEl.dispatchEvent(loadEvent);
+
+        assert.strictEqual(hasCall, true);
+    });
+
 });

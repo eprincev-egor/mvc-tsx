@@ -34,7 +34,9 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
     }
 
     render() {
-        return this.template(this.model);
+        const dom = this.template(this.model);
+        const cloneWithEventHandlers = this.cloneWithControllersEvents(dom);
+        return cloneWithEventHandlers;
     }
 
     componentWillReceiveProps(newProps: {model: TModel}) {
@@ -74,6 +76,21 @@ export abstract class View<TModel extends Model> extends React.Component<{model:
      */
     onDestroy() {
         // redefine me
+    }
+
+    private cloneWithControllersEvents(dom: JSX.Element) {
+        let clone = dom;
+        const cloneProps: any = {...clone.props};
+        let cloneChildren: any[] = [];
+
+        if ( Array.isArray(cloneProps.children) ) {
+            cloneChildren = cloneProps.children.map((childNode: JSX.Element) =>
+                this.cloneWithControllersEvents(childNode)
+            );
+        }
+
+        clone = React.cloneElement(dom, cloneProps, ...cloneChildren);
+        return dom;
     }
 
     private stopListenModel() {
